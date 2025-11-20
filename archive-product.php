@@ -106,7 +106,10 @@ if (!function_exists('tavaled_render_wc_product_card')) {
                     </a>
                     <a href="#contact-popup"
                        class="btn-quote popup-trigger"
-                       data-source="<?php echo esc_attr($quote_source); ?>">
+                       data-source="<?php echo esc_attr($quote_source); ?>"
+                       data-product-id="<?php echo esc_attr($product_id); ?>"
+                       data-product-name="<?php echo esc_attr($product_title); ?>"
+                       data-category-name="<?php echo esc_attr($term_name); ?>">
                         <i class="fas fa-calculator"></i>
                         <span><?php esc_html_e('Nhận báo giá', 'tavaled-theme'); ?></span>
                     </a>

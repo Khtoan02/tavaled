@@ -106,6 +106,14 @@ add_action('init', 'tavaled_ensure_woocommerce_shop_page', 20);
 // Kích hoạt theme
 add_action('after_setup_theme', 'tavaled_theme_setup');
 
+/**
+ * Remove WooCommerce breadcrumb globally (đã thiết kế lại custom)
+ */
+function tavaled_disable_wc_breadcrumb() {
+    remove_action('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20);
+}
+add_action('init', 'tavaled_disable_wc_breadcrumb', 20);
+
 // Enqueue scripts và styles
 add_action('wp_enqueue_scripts', 'tavaled_enqueue_scripts');
 
@@ -368,11 +376,14 @@ function tavaled_handle_contact_form() {
         wp_send_json_error(array('message' => 'Số điện thoại không hợp lệ.'));
     }
     
-    // Get source (where the form was submitted from)
+    // Get source and product info (where the form was submitted from)
     $source = isset($_POST['source']) ? sanitize_text_field($_POST['source']) : 'Contact Popup';
+    $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
+    $product_name = isset($_POST['product_name']) ? sanitize_text_field($_POST['product_name']) : '';
+    $category_name = isset($_POST['category_name']) ? sanitize_text_field($_POST['category_name']) : '';
     $referer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw($_SERVER['HTTP_REFERER']) : '';
     
-    // Try to detect page from referer
+    // Try to detect page from referer if source is generic
     if (empty($source) || $source === 'Contact Popup') {
         if (strpos($referer, home_url()) !== false) {
             $parsed_url = parse_url($referer);
@@ -429,6 +440,17 @@ function tavaled_handle_contact_form() {
     update_post_meta($consultation_id, '_consultation_status', 'new');
     update_post_meta($consultation_id, '_consultation_type', 'contact_form');
     
+    // Save product information if available
+    if ($product_id > 0) {
+        update_post_meta($consultation_id, '_consultation_product_id', $product_id);
+    }
+    if (!empty($product_name)) {
+        update_post_meta($consultation_id, '_consultation_product_name', $product_name);
+    }
+    if (!empty($category_name)) {
+        update_post_meta($consultation_id, '_consultation_category_name', $category_name);
+    }
+    
     // Prepare email
     $to = tavaled_get_option('email_address', get_option('admin_email'));
     $email_subject = 'Nhận báo giá mới - ' . get_bloginfo('name');
@@ -444,7 +466,21 @@ function tavaled_handle_contact_form() {
     if (!empty($message_content)) {
         $email_message .= "Nội dung: " . $message_content . "\n";
     }
+    if (!empty($product_name) || !empty($category_name) || $product_id > 0) {
+        $email_message .= "\n--- Thông tin sản phẩm ---\n";
+        if (!empty($product_name)) {
+            $email_message .= "Sản phẩm: " . $product_name . "\n";
+        }
+        if (!empty($category_name)) {
+            $email_message .= "Danh mục: " . $category_name . "\n";
+        }
+        if ($product_id > 0) {
+            $email_message .= "Link sản phẩm: " . get_permalink($product_id) . "\n";
+        }
+    }
+    $email_message .= "\n--- Thông tin nguồn ---\n";
     $email_message .= "Nguồn: " . $source . "\n";
+    $email_message .= "Trang tham chiếu: " . $referer . "\n";
     $email_message .= "Thời gian: " . current_time('mysql') . "\n";
     $email_message .= "\nXem chi tiết: " . admin_url('post.php?post=' . $consultation_id . '&action=edit');
     

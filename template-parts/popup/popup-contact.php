@@ -21,6 +21,9 @@
             <form class="contact-form" action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="post">
                 <input type="hidden" name="action" value="tavaled_contact_form">
                 <input type="hidden" name="source" value="Contact Popup" id="popup-source">
+                <input type="hidden" name="product_id" value="" id="popup-product-id">
+                <input type="hidden" name="product_name" value="" id="popup-product-name">
+                <input type="hidden" name="category_name" value="" id="popup-category-name">
                 <?php wp_nonce_field('tavaled_contact_nonce', 'contact_nonce'); ?>
                 
                 <div class="form-group">
@@ -61,26 +64,48 @@
             if ($(this).attr('href') === '#contact-popup') {
                 e.preventDefault();
                 
-                // Detect source based on trigger location
-                var triggerText = $(this).text().trim();
-                var triggerClass = $(this).attr('class') || '';
-                var source = 'Contact Popup';
+                var trigger = $(this);
+                var triggerText = trigger.text().trim();
+                var triggerClass = trigger.attr('class') || '';
                 
-                // Detect from trigger context
-                if (triggerClass.indexOf('btn-quote') !== -1 || triggerText.indexOf('Báo giá') !== -1) {
-                    source = 'Contact Popup - Quote Button';
-                } else if (triggerClass.indexOf('btn-support') !== -1) {
-                    source = 'Contact Popup - Support Button';
-                } else if ($(this).closest('.hero-section').length) {
-                    source = 'Contact Popup - Hero Section';
-                } else if ($(this).closest('.solutions-section').length) {
-                    source = 'Contact Popup - Solutions Section';
-                } else if ($(this).closest('.products-section').length) {
-                    source = 'Contact Popup - Products Section';
+                // Read data attributes if available
+                var dataSource = trigger.data('source') || '';
+                var productId = trigger.data('product-id') || '';
+                var productName = trigger.data('product-name') || '';
+                var categoryName = trigger.data('category-name') || '';
+                
+                var source = dataSource || 'Contact Popup';
+                
+                if (!dataSource) {
+                    if (triggerClass.indexOf('btn-quote') !== -1 || triggerText.indexOf('Báo giá') !== -1 || triggerText.indexOf('Nhận báo giá') !== -1) {
+                        source = 'Contact Popup - Quote Button';
+                    } else if (triggerClass.indexOf('btn-support') !== -1) {
+                        source = 'Contact Popup - Support Button';
+                    } else if (trigger.closest('.hero-section').length) {
+                        source = 'Contact Popup - Hero Section';
+                    } else if (trigger.closest('.solutions-section').length) {
+                        source = 'Contact Popup - Solutions Section';
+                    } else if (trigger.closest('.products-section').length) {
+                        source = 'Contact Popup - Products Section';
+                    } else if (trigger.closest('.product-category-section').length) {
+                        var categoryTitle = trigger.closest('.product-category-section').find('.section-title .section-heading').first().text().trim();
+                        source = categoryTitle ? 'Contact Popup - Danh mục: ' + categoryTitle : 'Contact Popup - Product Archive';
+                    } else if (trigger.closest('.products-archive-page').length) {
+                        source = 'Contact Popup - Product Archive';
+                    }
                 }
                 
-                // Update source field
+                if (productName) {
+                    source += ' | Sản phẩm: ' + productName;
+                }
+                if (categoryName && source.indexOf('Danh mục') === -1) {
+                    source += ' | Danh mục: ' + categoryName;
+                }
+                
                 $('#popup-source').val(source);
+                $('#popup-product-id').val(productId);
+                $('#popup-product-name').val(productName);
+                $('#popup-category-name').val(categoryName);
                 
                 popup.addClass('active');
                 $('body').addClass('popup-open');
