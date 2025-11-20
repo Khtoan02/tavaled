@@ -13,27 +13,32 @@ get_header();
 
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
-        
         <?php if (!is_front_page()) : ?>
-            <!-- Page Header -->
-            <div class="page-header">
+            <div class="blog-archive-header">
                 <div class="container">
                     <?php tavaled_breadcrumbs(); ?>
-                    
-                    <h1 class="page-title">
+                    <p class="archive-eyebrow"><?php esc_html_e('Tin tức & chia sẻ', 'tavaled-theme'); ?></p>
+                    <h1 class="archive-title">
                         <?php
                         if (is_home() && !is_front_page()) {
-                            single_post_title();
+                            echo esc_html(single_post_title('', false));
                         } elseif (is_archive()) {
                             the_archive_title();
                         } elseif (is_search()) {
-                            printf(esc_html__('Kết quả tìm kiếm cho: %s', 'tavaled-theme'), '<span>' . get_search_query() . '</span>');
+                            echo wp_kses(
+                                sprintf(
+                                    __('Kết quả tìm kiếm cho: %s', 'tavaled-theme'),
+                                    '<span>' . esc_html(get_search_query()) . '</span>'
+                                ),
+                                array('span' => array())
+                            );
                         } elseif (is_404()) {
                             esc_html_e('Oops! Không tìm thấy trang.', 'tavaled-theme');
+                        } else {
+                            echo esc_html(get_bloginfo('name'));
                         }
                         ?>
                     </h1>
-                    
                     <?php if (is_archive()) : ?>
                         <div class="archive-description">
                             <?php the_archive_description(); ?>
@@ -42,49 +47,16 @@ get_header();
                 </div>
             </div>
         <?php endif; ?>
-        
-        <div class="container">
-            <div class="content-wrapper">
-                <div class="primary-content">
-                    <?php
-                    if (have_posts()) :
-                        
-                        echo '<div class="posts-grid grid grid-3">';
-                        
-                        /* Start the Loop */
-                        while (have_posts()) :
-                            the_post();
-                            
-                            /*
-                             * Include the Post-Type-specific template for the content.
-                             * If you want to override this in a child theme, then include a file
-                             * called content-___.php (where ___ is the Post Type name) and that will be used instead.
-                             */
-                            get_template_part('template-parts/content', get_post_type());
-                            
-                        endwhile;
-                        
-                        echo '</div><!-- .posts-grid -->';
-                        
-                        // Pagination
-                        tavaled_pagination();
-                        
-                    else :
-                        
-                        get_template_part('template-parts/content', 'none');
-                        
-                    endif;
-                    ?>
-                </div><!-- .primary-content -->
-                
-                <?php if (tavaled_has_sidebar()) : ?>
-                    <aside class="sidebar-content">
-                        <?php get_sidebar(); ?>
-                    </aside>
-                <?php endif; ?>
-            </div><!-- .content-wrapper -->
+
+        <div class="container blog-loop-container">
+            <?php
+            set_query_var('tavaled_blog_pagination', array(
+                'prev_text' => __('&laquo; Trước', 'tavaled-theme'),
+                'next_text' => __('Sau &raquo;', 'tavaled-theme'),
+            ));
+            get_template_part('template-parts/blog', 'loop');
+            ?>
         </div><!-- .container -->
-        
     </main><!-- #main -->
 </div><!-- #primary -->
 

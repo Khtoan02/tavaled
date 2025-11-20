@@ -110,14 +110,14 @@
                                 <span class="btn-text">Báo giá</span>
                             </a>
                         </div>
+                        
+                        <!-- Mobile Menu Toggle - Bên phải -->
+                        <button class="mobile-menu-toggle d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-label="Toggle menu">
+                            <span class="hamburger-line"></span>
+                            <span class="hamburger-line"></span>
+                            <span class="hamburger-line"></span>
+                        </button>
                     </div>
-                    
-                    <!-- Mobile Menu Toggle -->
-                    <button class="mobile-menu-toggle d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@
             <div class="p-3 border-top mt-3">
                 <a href="#contact-popup" class="btn btn-primary w-100 popup-trigger">
                     <i class="fas fa-paper-plane me-2"></i>
-                    Yêu cầu báo giá
+                    <?php esc_html_e('Nhận báo giá', 'tavaled-theme'); ?>
                 </a>
             </div>
         </div>

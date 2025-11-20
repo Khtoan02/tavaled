@@ -23,7 +23,18 @@ function tavaled_add_product_meta_boxes() {
         'high'
     );
 }
-add_action('add_meta_boxes', 'tavaled_add_product_meta_boxes');
+/**
+ * Register legacy product meta boxes only when the old post type exists
+ */
+function tavaled_register_legacy_product_meta() {
+    if (!post_type_exists('san-pham')) {
+        return;
+    }
+
+    add_action('add_meta_boxes', 'tavaled_add_product_meta_boxes');
+    add_action('save_post', 'tavaled_save_product_meta');
+}
+add_action('init', 'tavaled_register_legacy_product_meta');
 
 /**
  * Product details meta box callback
@@ -214,6 +225,10 @@ function tavaled_product_details_callback($post) {
  * Save product meta data
  */
 function tavaled_save_product_meta($post_id) {
+    if (get_post_type($post_id) !== 'san-pham') {
+        return;
+    }
+    
     // Check nonce
     if (!isset($_POST['tavaled_product_meta_nonce']) || !wp_verify_nonce($_POST['tavaled_product_meta_nonce'], 'tavaled_save_product_meta')) {
         return;
@@ -253,7 +268,6 @@ function tavaled_save_product_meta($post_id) {
     $featured = isset($_POST['product_featured']) ? 'yes' : 'no';
     update_post_meta($post_id, '_product_featured', $featured);
 }
-add_action('save_post', 'tavaled_save_product_meta');
 
 /**
  * Helper function to get product meta

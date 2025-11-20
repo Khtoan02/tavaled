@@ -133,8 +133,8 @@ get_header();
                                     <div class="checkbox-group">
                                         <?php
                                         $product_categories = get_terms(array(
-                                            'taxonomy' => 'danh-muc-san-pham',
-                                            'hide_empty' => false,
+                                            'taxonomy' => 'product_cat',
+                                            'hide_empty' => true,
                                         ));
                                         
                                         foreach ($product_categories as $category) :

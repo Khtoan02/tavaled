@@ -246,6 +246,10 @@ function tavaled_create_sample_products() {
  * Initialize sample data
  */
 function tavaled_init_sample_data() {
+    if (!post_type_exists('san-pham')) {
+        return;
+    }
+    
     // Only run once
     if (get_option('tavaled_sample_data_created')) {
         return;

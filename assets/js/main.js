@@ -20,21 +20,50 @@
     initProductFilter();
     initProductsTabs();
     initProductsCarousel();
+    initCategorySliders();
     initPopups();
     initForms();
+    initReadingProgress();
   });
 
-  // Header scroll effect
+  // Header scroll effect - Tối ưu cho mobile
   function initHeaderScroll() {
     var header = $(".site-header");
-    var scrollThreshold = 100;
+    var headerMain = $(".header-main");
+    var scrollThreshold = 50; // Giảm threshold cho mobile
+    var lastScrollTop = 0;
+    var isScrolling = false;
 
     $(window).on("scroll", function () {
-      if ($(this).scrollTop() > scrollThreshold) {
-        header.addClass("scrolled");
-      } else {
-        header.removeClass("scrolled");
-      }
+      if (isScrolling) return;
+      isScrolling = true;
+
+      requestAnimationFrame(function () {
+        var scrollTop = $(this).scrollTop();
+        var windowWidth = $(window).width();
+
+        // Điều chỉnh threshold theo kích thước màn hình
+        var threshold = windowWidth <= 768 ? 30 : 100;
+
+        if (scrollTop > threshold) {
+          header.addClass("scrolled");
+          
+          // Ẩn header khi scroll xuống, hiện khi scroll lên (chỉ trên mobile)
+          if (windowWidth <= 768) {
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+              headerMain.addClass("header-hidden");
+            } else {
+              headerMain.removeClass("header-hidden");
+            }
+          }
+        } else {
+          header.removeClass("scrolled");
+          headerMain.removeClass("header-hidden");
+        }
+
+        lastScrollTop = scrollTop;
+        isScrolling = false;
+      }.bind(this));
     });
   }
 
@@ -97,7 +126,7 @@
     });
   }
 
-  // Dropdown menu
+  // Dropdown menu - Tối ưu cho mobile
   function initDropdownMenu() {
     var dropdownItems = $(".has-dropdown");
     var dropdownMenus = $(".dropdown-menu");
@@ -123,9 +152,28 @@
 
         if (dropdownMenu.length && $(this).attr("href") === "#") {
           e.preventDefault();
-          dropdownMenu.slideToggle();
+          dropdownMenu.slideToggle(300);
           parentItem.toggleClass("active");
         }
+      }
+    });
+
+    // Mobile menu submenu toggle
+    $(".mobile-nav-link").on("click", function (e) {
+      var $this = $(this);
+      var $parent = $this.closest(".mobile-nav-item");
+      var $submenu = $parent.find(".mobile-submenu");
+      var href = $this.attr("href");
+
+      // Nếu có submenu và không phải là link thực sự
+      if ($submenu.length && (!href || href === "#")) {
+        e.preventDefault();
+        $parent.toggleClass("active");
+        $this.toggleClass("active");
+        
+        // Đóng các submenu khác
+        $(".mobile-nav-item").not($parent).removeClass("active");
+        $(".mobile-nav-link").not($this).removeClass("active");
       }
     });
 
@@ -424,7 +472,9 @@
 
       var form = $(this);
       var submitBtn = form.find('button[type="submit"]');
-      var originalText = submitBtn.text();
+      var messageDiv = form.find('.form-message');
+      var buttonText = submitBtn.find('.button-text');
+      var buttonLoading = submitBtn.find('.button-loading');
 
       // Basic validation
       var isValid = true;
@@ -438,21 +488,107 @@
       });
 
       if (isValid) {
-        submitBtn.text("Đang gửi...").prop("disabled", true);
+        submitBtn.prop("disabled", true).addClass("loading");
+        buttonText.hide();
+        buttonLoading.show();
+        messageDiv.removeClass("success error").empty();
 
-        // Simulate form submission
-        setTimeout(function () {
-          showNotification(
-            "Cảm ơn bạn! Chúng tôi sẽ liên hệ sớm nhất.",
-            "success"
-          );
-          form[0].reset();
-          submitBtn.text(originalText).prop("disabled", false);
-        }, 2000);
+        // Submit via AJAX
+        $.ajax({
+          url: form.attr("action"),
+          type: "POST",
+          data: form.serialize(),
+          success: function (response) {
+            if (response.success) {
+              messageDiv.addClass("success").html(response.data.message || "Cảm ơn bạn! Chúng tôi sẽ liên hệ sớm nhất.");
+              form[0].reset();
+              
+              // Close popup after 3 seconds if it's a popup form
+              if (form.closest('.popup-overlay').length) {
+                setTimeout(function () {
+                  form.closest('.popup-overlay').removeClass('active');
+                  $('body').removeClass('popup-open');
+                }, 3000);
+              }
+            } else {
+              messageDiv.addClass("error").html(response.data.message || "Có lỗi xảy ra. Vui lòng thử lại.");
+            }
+          },
+          error: function () {
+            messageDiv.addClass("error").html("Có lỗi xảy ra. Vui lòng thử lại.");
+          },
+          complete: function () {
+            submitBtn.prop("disabled", false).removeClass("loading");
+            buttonText.show();
+            buttonLoading.hide();
+          }
+        });
       } else {
-        showNotification("Vui lòng điền đầy đủ thông tin.", "error");
+        messageDiv.addClass("error").html("Vui lòng điền đầy đủ thông tin.");
       }
     });
+
+    // Phone CTA form
+    $(".phone-cta-form").on("submit", function (e) {
+      e.preventDefault();
+
+      var form = $(this);
+      var submitBtn = form.find('button[type="submit"]');
+      var messageDiv = form.find('.phone-form-message');
+      var phoneInput = form.find('input[name="phone"]');
+
+      // Basic validation
+      if (!phoneInput.val().trim()) {
+        messageDiv.addClass("error").html("Vui lòng nhập số điện thoại.").show();
+        phoneInput.focus();
+        return;
+      }
+
+      submitBtn.prop("disabled", true).addClass("loading");
+      messageDiv.removeClass("success error").empty().hide();
+
+      // Submit via AJAX
+      $.ajax({
+        url: form.attr("action"),
+        type: "POST",
+        data: form.serialize(),
+        success: function (response) {
+          if (response.success) {
+            messageDiv.addClass("success").html(response.data.message || "Cảm ơn bạn! Chúng tôi sẽ liên hệ sớm nhất.").show();
+            form[0].reset();
+          } else {
+            messageDiv.addClass("error").html(response.data.message || "Có lỗi xảy ra. Vui lòng thử lại.").show();
+          }
+        },
+        error: function () {
+          messageDiv.addClass("error").html("Có lỗi xảy ra. Vui lòng thử lại.").show();
+        },
+        complete: function () {
+          submitBtn.prop("disabled", false).removeClass("loading");
+        }
+      });
+    });
+  }
+
+  // Reading progress indicator
+  function initReadingProgress() {
+    var progressBar = document.querySelector(".single-progress-bar");
+    if (!progressBar) {
+      return;
+    }
+
+    var updateProgress = function () {
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      progress = Math.min(Math.max(progress, 0), 1);
+      progressBar.style.transform = "scaleX(" + progress + ")";
+    };
+
+    window.addEventListener("scroll", updateProgress);
+    window.addEventListener("resize", updateProgress);
+    updateProgress();
   }
 
   // Products Tabs
@@ -489,17 +625,33 @@
 
   function initCarouselForTab(tabName) {
     var carousel = $('.products-carousel[data-tab="' + tabName + '"]');
+    if (!carousel.length) return;
+    
+    var container = carousel.find(".carousel-container");
     var track = carousel.find(".carousel-track");
-    var prevBtn = carousel.find(".prev-btn");
-    var nextBtn = carousel.find(".next-btn");
+    var prevBtn = carousel.find(".carousel-prev");
+    var nextBtn = carousel.find(".carousel-next");
     var cards = track.find(".product-card");
 
     if (cards.length === 0) return;
 
-    var cardWidth = cards.first().outerWidth(true);
-    var visibleCards = Math.floor(track.width() / cardWidth);
     var currentIndex = 0;
-    var maxIndex = Math.max(0, cards.length - visibleCards);
+    var cardWidth = 0;
+    var containerWidth = 0;
+    var visibleCards = 0;
+    var maxIndex = 0;
+
+    // Calculate dimensions
+    function calculateDimensions() {
+      cardWidth = cards.first().outerWidth(true);
+      containerWidth = container.width();
+      visibleCards = Math.max(1, Math.floor(containerWidth / cardWidth));
+      maxIndex = Math.max(0, cards.length - visibleCards);
+      
+      if (currentIndex > maxIndex) {
+        currentIndex = maxIndex;
+      }
+    }
 
     // Update navigation buttons
     function updateNavButtons() {
@@ -507,18 +659,22 @@
       nextBtn.prop("disabled", currentIndex >= maxIndex);
     }
 
-    // Initialize navigation buttons
+    // Move carousel
+    function moveCarousel() {
+      var translateX = -currentIndex * cardWidth;
+      track.css("transform", "translateX(" + translateX + "px)");
+      updateNavButtons();
+    }
+
+    // Initialize
+    calculateDimensions();
     updateNavButtons();
 
     // Previous button click
     prevBtn.off("click").on("click", function () {
       if (currentIndex > 0) {
         currentIndex--;
-        track.css(
-          "transform",
-          "translateX(-" + currentIndex * cardWidth + "px)"
-        );
-        updateNavButtons();
+        moveCarousel();
       }
     });
 
@@ -526,11 +682,7 @@
     nextBtn.off("click").on("click", function () {
       if (currentIndex < maxIndex) {
         currentIndex++;
-        track.css(
-          "transform",
-          "translateX(-" + currentIndex * cardWidth + "px)"
-        );
-        updateNavButtons();
+        moveCarousel();
       }
     });
 
@@ -540,6 +692,7 @@
     var isDragging = false;
 
     track.on("touchstart mousedown", function (e) {
+      if (e.type === "mousedown" && e.which !== 1) return;
       isDragging = true;
       startX = e.type === "mousedown" ? e.pageX : e.touches[0].pageX;
       currentX = startX;
@@ -548,94 +701,178 @@
 
     track.on("touchmove mousemove", function (e) {
       if (!isDragging) return;
-
       e.preventDefault();
       currentX = e.type === "mousemove" ? e.pageX : e.touches[0].pageX;
       var diff = currentX - startX;
-      track.css("transform", "translateX(" + diff + "px)");
+      track.css("transform", "translateX(" + (-currentIndex * cardWidth + diff) + "px)");
     });
 
     track.on("touchend mouseup", function (e) {
       if (!isDragging) return;
-
       isDragging = false;
-      track.css("transition", "transform 0.3s ease");
+      track.css("transition", "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)");
 
       var diff = currentX - startX;
       var threshold = cardWidth / 3;
 
       if (Math.abs(diff) > threshold) {
         if (diff > 0 && currentIndex > 0) {
-          // Swipe right - go to previous
           currentIndex--;
         } else if (diff < 0 && currentIndex < maxIndex) {
-          // Swipe left - go to next
           currentIndex++;
         }
       }
 
-      track.css("transform", "translateX(-" + currentIndex * cardWidth + "px)");
-      updateNavButtons();
+      moveCarousel();
     });
-
-    // Keyboard navigation
-    carousel.on("keydown", function (e) {
-      if (e.key === "ArrowLeft" && currentIndex > 0) {
-        currentIndex--;
-        track.css(
-          "transform",
-          "translateX(-" + currentIndex * cardWidth + "px)"
-        );
-        updateNavButtons();
-      } else if (e.key === "ArrowRight" && currentIndex < maxIndex) {
-        currentIndex++;
-        track.css(
-          "transform",
-          "translateX(-" + currentIndex * cardWidth + "px)"
-        );
-        updateNavButtons();
-      }
-    });
-
-    // Auto-play functionality (optional)
-    var autoPlayInterval;
-
-    function startAutoPlay() {
-      autoPlayInterval = setInterval(function () {
-        if (currentIndex < maxIndex) {
-          currentIndex++;
-        } else {
-          currentIndex = 0;
-        }
-        track.css(
-          "transform",
-          "translateX(-" + currentIndex * cardWidth + "px)"
-        );
-        updateNavButtons();
-      }, 5000); // Change slide every 5 seconds
-    }
-
-    function stopAutoPlay() {
-      if (autoPlayInterval) {
-        clearInterval(autoPlayInterval);
-      }
-    }
-
-    // Start auto-play on hover
-    carousel.hover(stopAutoPlay, startAutoPlay);
 
     // Responsive handling
+    var resizeTimer;
     $(window).on("resize", function () {
-      cardWidth = cards.first().outerWidth(true);
-      visibleCards = Math.floor(track.width() / cardWidth);
-      maxIndex = Math.max(0, cards.length - visibleCards);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        calculateDimensions();
+        moveCarousel();
+      }, 250);
+    });
+  }
 
-      if (currentIndex > maxIndex) {
-        currentIndex = maxIndex;
+  // Category sliders on product archive
+  function initCategorySliders() {
+    var sliders = $(".category-slider");
+    if (!sliders.length) {
+      return;
+    }
+
+    sliders.each(function () {
+      var slider = $(this);
+      var track = slider.find(".category-slider-track");
+      var cards = track.find(".category-product-card");
+      var prevBtn = slider.find(".category-slider-nav.prev");
+      var nextBtn = slider.find(".category-slider-nav.next");
+
+      if (!cards.length) {
+        slider.addClass("is-static");
+        prevBtn.prop("disabled", true);
+        nextBtn.prop("disabled", true);
+        return;
       }
 
-      track.css("transform", "translateX(-" + currentIndex * cardWidth + "px)");
-      updateNavButtons();
+      var currentIndex = 0;
+      var cardWidth = cards.first().outerWidth();
+      var initialStyles = window.getComputedStyle(track[0]);
+      var cardSpacing =
+        parseFloat(initialStyles.columnGap || initialStyles.gap || 0) || 0;
+      var containerWidth = slider.innerWidth();
+      var visibleCards = Math.max(
+        1,
+        Math.floor(containerWidth / (cardWidth + cardSpacing))
+      );
+      var maxIndex = Math.max(0, cards.length - visibleCards);
+
+      function updateNavState() {
+        if (cards.length <= visibleCards) {
+          slider.addClass("is-static");
+          prevBtn.prop("disabled", true);
+          nextBtn.prop("disabled", true);
+        } else {
+          slider.removeClass("is-static");
+          prevBtn.prop("disabled", currentIndex === 0);
+          nextBtn.prop("disabled", currentIndex >= maxIndex);
+        }
+      }
+
+      function moveSlider() {
+        var translateX = -currentIndex * (cardWidth + cardSpacing);
+        track.css("transform", "translateX(" + translateX + "px)");
+        updateNavState();
+      }
+
+      function recalcDimensions() {
+        cardWidth = cards.first().outerWidth();
+        var computedStyles = window.getComputedStyle(track[0]);
+        cardSpacing =
+          parseFloat(computedStyles.columnGap || computedStyles.gap || 0) || 0;
+        containerWidth = slider.innerWidth();
+        visibleCards = Math.max(
+          1,
+          Math.floor(containerWidth / (cardWidth + cardSpacing))
+        );
+        maxIndex = Math.max(0, cards.length - visibleCards);
+        currentIndex = Math.min(currentIndex, maxIndex);
+      }
+
+      prevBtn.on("click", function () {
+        if (currentIndex > 0) {
+          currentIndex--;
+          moveSlider();
+        }
+      });
+
+      nextBtn.on("click", function () {
+        if (currentIndex < maxIndex) {
+          currentIndex++;
+          moveSlider();
+        }
+      });
+
+      // Drag / swipe support
+      var startX = 0;
+      var currentX = 0;
+      var isDragging = false;
+
+      track.on("touchstart mousedown", function (e) {
+        if (e.type === "mousedown" && e.which !== 1) return;
+        isDragging = true;
+        startX = e.type === "mousedown" ? e.pageX : e.touches[0].pageX;
+        currentX = startX;
+        track.addClass("is-dragging");
+      });
+
+      track.on("touchmove mousemove", function (e) {
+        if (!isDragging) return;
+        currentX = e.type === "mousemove" ? e.pageX : e.touches[0].pageX;
+        var diff = currentX - startX;
+        track.css(
+          "transform",
+          "translateX(" + (-currentIndex * (cardWidth + cardSpacing) + diff) + "px)"
+        );
+        if (e.type === "mousemove") {
+          e.preventDefault();
+        }
+      });
+
+      track.on("touchend mouseup mouseleave", function () {
+        if (!isDragging) return;
+        isDragging = false;
+        track.removeClass("is-dragging");
+        var diff = currentX - startX;
+        var threshold = cardWidth / 4;
+
+        if (Math.abs(diff) > threshold) {
+          if (diff > 0 && currentIndex > 0) {
+            currentIndex--;
+          } else if (diff < 0 && currentIndex < maxIndex) {
+            currentIndex++;
+          }
+        }
+
+        moveSlider();
+      });
+
+      // Initial calculation
+      recalcDimensions();
+      moveSlider();
+
+      // Responsive recalculation
+      var resizeTimer;
+      $(window).on("resize", function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          recalcDimensions();
+          moveSlider();
+        }, 250);
+      });
     });
   }
 })(jQuery);

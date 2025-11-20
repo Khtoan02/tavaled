@@ -10,62 +10,26 @@ get_header();
 
 <div id="primary" class="content-area">
     <main id="main" class="site-main">
-        
-        <!-- Archive Header -->
-        <div class="archive-header">
+        <div class="blog-archive-header">
             <div class="container">
                 <?php tavaled_breadcrumbs(); ?>
-                
+                <p class="archive-eyebrow"><?php esc_html_e('Danh sách nội dung', 'tavaled-theme'); ?></p>
                 <h1 class="archive-title">
-                    <?php echo tavaled_get_archive_title(); ?>
+                    <?php echo esc_html(tavaled_get_archive_title()); ?>
                 </h1>
-                
-                <?php
-                the_archive_description('<div class="archive-description">', '</div>');
-                ?>
+                <?php the_archive_description('<div class="archive-description">', '</div>'); ?>
             </div>
         </div>
-        
-        <div class="container">
-            <div class="content-wrapper">
-                <div class="primary-content">
-                    <?php if (have_posts()) : ?>
-                        
-                        <div class="archive-grid grid grid-3">
-                            <?php
-                            /* Start the Loop */
-                            while (have_posts()) :
-                                the_post();
-                                
-                                /*
-                                 * Include the Post-Type-specific template for the content.
-                                 */
-                                get_template_part('template-parts/content', get_post_type());
-                                
-                            endwhile;
-                            ?>
-                        </div><!-- .archive-grid -->
-                        
-                        <?php
-                        // Pagination
-                        tavaled_pagination();
-                        
-                    else :
-                        
-                        get_template_part('template-parts/content', 'none');
-                        
-                    endif;
-                    ?>
-                </div><!-- .primary-content -->
-                
-                <?php if (tavaled_has_sidebar()) : ?>
-                    <aside class="sidebar-content">
-                        <?php get_sidebar(); ?>
-                    </aside>
-                <?php endif; ?>
-            </div><!-- .content-wrapper -->
+
+        <div class="container blog-loop-container">
+            <?php
+            set_query_var('tavaled_blog_pagination', array(
+                'prev_text' => __('&laquo; Trước', 'tavaled-theme'),
+                'next_text' => __('Sau &raquo;', 'tavaled-theme'),
+            ));
+            get_template_part('template-parts/blog', 'loop');
+            ?>
         </div><!-- .container -->
-        
     </main><!-- #main -->
 </div><!-- #primary -->
 

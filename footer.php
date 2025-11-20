@@ -344,6 +344,89 @@
     
     window.addEventListener('scroll', animateStats);
     animateStats(); // Check on load
+
+    // Product Carousel Logic
+    const carousels = document.querySelectorAll('.products-carousel');
+
+    carousels.forEach(carousel => {
+        const track = carousel.querySelector('.carousel-track');
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+        const cards = track.querySelectorAll('.product-card');
+
+        if (!track || !prevBtn || !nextBtn || cards.length === 0) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            return;
+        }
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        const updateNavButtons = () => {
+            // Use a small timeout to wait for scroll to settle
+            setTimeout(() => {
+                const scrollAmount = track.scrollLeft;
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                
+                // Hide buttons if carousel is not scrollable
+                if (track.scrollWidth <= track.clientWidth) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = scrollAmount > 10 ? 'flex' : 'none';
+                    nextBtn.style.display = scrollAmount < maxScroll - 10 ? 'flex' : 'none';
+                }
+            }, 350); // 350ms matches smooth scroll behavior
+        };
+
+        // Initial check
+        updateNavButtons();
+        window.addEventListener('resize', updateNavButtons); // Re-check on resize
+
+        // Event listeners for nav buttons
+        nextBtn.addEventListener('click', () => {
+            const cardStyle = window.getComputedStyle(cards[0]);
+            const cardWidth = cards[0].offsetWidth + parseFloat(cardStyle.marginRight) + parseFloat(cardStyle.marginLeft);
+            track.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+
+        prevBtn.addEventListener('click', () => {
+            const cardStyle = window.getComputedStyle(cards[0]);
+            const cardWidth = cards[0].offsetWidth + parseFloat(cardStyle.marginRight) + parseFloat(cardStyle.marginLeft);
+            track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+
+        // Event listeners for drag-to-scroll
+        track.addEventListener('mousedown', (e) => {
+            isDown = true;
+            track.classList.add('active');
+            startX = e.pageX - track.offsetLeft;
+            scrollLeft = track.scrollLeft;
+            e.preventDefault(); // Prevent text selection
+        });
+
+        track.addEventListener('mouseleave', () => {
+            isDown = false;
+            track.classList.remove('active');
+        });
+
+        track.addEventListener('mouseup', () => {
+            isDown = false;
+            track.classList.remove('active');
+        });
+
+        track.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - track.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll-fast
+            track.scrollLeft = scrollLeft - walk;
+        });
+
+        track.addEventListener('scroll', updateNavButtons);
+    });
 })();
 </script>
 

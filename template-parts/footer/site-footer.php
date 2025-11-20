@@ -67,8 +67,8 @@
                 <h3><?php esc_html_e('Sản phẩm', 'tavaled-theme'); ?></h3>
                 <?php
                 $product_categories = get_terms(array(
-                    'taxonomy' => 'danh-muc-san-pham',
-                    'hide_empty' => false,
+                    'taxonomy' => 'product_cat',
+                    'hide_empty' => true,
                     'number' => 6,
                 ));
                 

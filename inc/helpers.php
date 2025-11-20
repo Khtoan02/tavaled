@@ -36,68 +36,185 @@ function tavaled_breadcrumbs() {
         return;
     }
     
-    echo '<nav class="breadcrumbs" aria-label="Breadcrumb">';
-    echo '<ol class="breadcrumb-list">';
-    
-    // Home
-    echo '<li class="breadcrumb-item"><a href="' . esc_url(home_url('/')) . '">Trang chủ</a></li>';
-    
-    // Blog
-    if (is_single() && get_post_type() == 'post') {
+    $breadcrumbs = array();
+    $breadcrumbs[] = array(
+        'label' => esc_html__('Trang chủ', 'tavaled-theme'),
+        'url'   => home_url('/'),
+    );
+
+    if (is_single()) {
+        $post_type = get_post_type();
+
+        if ($post_type === 'post') {
+            // Thêm "Chia sẻ Kinh nghiệm" hoặc tên trang blog
         $blog_page_id = get_option('page_for_posts');
+            $blog_label = '';
+            $blog_url = '';
+            
         if ($blog_page_id) {
-            echo '<li class="breadcrumb-item"><a href="' . get_permalink($blog_page_id) . '">' . get_the_title($blog_page_id) . '</a></li>';
+                $blog_title = get_the_title($blog_page_id);
+                $blog_label = !empty(trim($blog_title)) ? trim($blog_title) : esc_html__('Chia sẻ Kinh nghiệm', 'tavaled-theme');
+                $blog_url = get_permalink($blog_page_id);
+            } else {
+                $blog_label = esc_html__('Chia sẻ Kinh nghiệm', 'tavaled-theme');
+                $blog_url = get_post_type_archive_link('post');
+    }
+    
+            // Chỉ thêm nếu label không rỗng
+            if (!empty(trim($blog_label))) {
+                $breadcrumbs[] = array(
+                    'label' => trim($blog_label),
+                    'url'   => $blog_url,
+                );
+            }
+        } else {
+            $post_type_object = get_post_type_object($post_type);
+            if ($post_type_object && $post_type_object->has_archive) {
+                $archive_label = !empty($post_type_object->labels->name) ? trim($post_type_object->labels->name) : trim($post_type_object->label);
+                if (!empty($archive_label)) {
+                    $breadcrumbs[] = array(
+                        'label' => $archive_label,
+                        'url'   => get_post_type_archive_link($post_type),
+                    );
+                }
+            }
         }
-    }
-    
-    // Custom Post Type Archive
-    if (is_single() && get_post_type() != 'post') {
-        $post_type = get_post_type_object(get_post_type());
-        if ($post_type->has_archive) {
-            echo '<li class="breadcrumb-item"><a href="' . get_post_type_archive_link(get_post_type()) . '">' . $post_type->labels->name . '</a></li>';
+
+        // Thêm tên bài viết - chỉ thêm nếu không rỗng
+        $post_title = get_the_title();
+        $post_title = trim($post_title);
+        if (!empty($post_title)) {
+            $breadcrumbs[] = array(
+                'label' => $post_title,
+                'url'   => '',
+            );
         }
-    }
-    
-    // Category
-    if (is_category()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">' . single_cat_title('', false) . '</li>';
-    }
-    
-    // Tag
-    if (is_tag()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">' . single_tag_title('', false) . '</li>';
-    }
-    
-    // Archive
-    if (is_archive() && !is_category() && !is_tag()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">' . post_type_archive_title('', false) . '</li>';
-    }
-    
-    // Search
-    if (is_search()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">Kết quả tìm kiếm</li>';
-    }
-    
-    // 404
-    if (is_404()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">404 - Không tìm thấy trang</li>';
-    }
-    
-    // Page
-    if (is_page() && !is_front_page()) {
+    } elseif (is_page()) {
         $ancestors = get_post_ancestors(get_the_ID());
         if ($ancestors) {
             $ancestors = array_reverse($ancestors);
-            foreach ($ancestors as $ancestor) {
-                echo '<li class="breadcrumb-item"><a href="' . get_permalink($ancestor) . '">' . get_the_title($ancestor) . '</a></li>';
+            foreach ($ancestors as $ancestor_id) {
+                $breadcrumbs[] = array(
+                    'label' => get_the_title($ancestor_id),
+                    'url'   => get_permalink($ancestor_id),
+                );
             }
         }
-        echo '<li class="breadcrumb-item active" aria-current="page">' . get_the_title() . '</li>';
+
+        $breadcrumbs[] = array(
+            'label' => get_the_title(),
+            'url'   => '',
+        );
+    } elseif (is_category()) {
+        $current_category = get_queried_object();
+        if ($current_category && !is_wp_error($current_category)) {
+            $ancestors = array_reverse(get_ancestors($current_category->term_id, 'category'));
+            foreach ($ancestors as $ancestor_id) {
+                $ancestor = get_term($ancestor_id, 'category');
+                if (!is_wp_error($ancestor)) {
+                    $breadcrumbs[] = array(
+                        'label' => $ancestor->name,
+                        'url'   => get_term_link($ancestor),
+                    );
+                }
+            }
+
+            $breadcrumbs[] = array(
+                'label' => $current_category->name,
+                'url'   => '',
+            );
+        }
+    } elseif (is_tag()) {
+        $breadcrumbs[] = array(
+            'label' => single_tag_title('', false),
+            'url'   => '',
+        );
+    } elseif (is_search()) {
+        $breadcrumbs[] = array(
+            'label' => esc_html__('Kết quả tìm kiếm', 'tavaled-theme'),
+            'url'   => '',
+        );
+    } elseif (is_404()) {
+        $breadcrumbs[] = array(
+            'label' => esc_html__('404 - Không tìm thấy trang', 'tavaled-theme'),
+            'url'   => '',
+        );
+    } elseif (is_archive()) {
+        $breadcrumbs[] = array(
+            'label' => post_type_archive_title('', false),
+            'url'   => '',
+        );
     }
-    
-    // Single
-    if (is_single()) {
-        echo '<li class="breadcrumb-item active" aria-current="page">' . get_the_title() . '</li>';
+
+    if (empty($breadcrumbs)) {
+        return;
+    }
+
+    // Filter out empty breadcrumbs - strict check
+    $valid_breadcrumbs = array();
+    foreach ($breadcrumbs as $crumb) {
+        if (!isset($crumb['label'])) {
+            continue;
+        }
+        
+        $label = trim($crumb['label']);
+        
+        // Skip if label is empty or only whitespace
+        if (empty($label) || $label === '') {
+            continue;
+        }
+        
+        // Only add if label has actual content
+        $valid_breadcrumbs[] = array(
+            'label' => $label,
+            'url'   => isset($crumb['url']) ? $crumb['url'] : '',
+        );
+    }
+
+    // Remove duplicates based on label
+    $seen = array();
+    $unique_breadcrumbs = array();
+    foreach ($valid_breadcrumbs as $crumb) {
+        $label_key = md5($crumb['label']);
+        if (!isset($seen[$label_key])) {
+            $seen[$label_key] = true;
+            $unique_breadcrumbs[] = $crumb;
+        }
+    }
+
+    if (empty($unique_breadcrumbs)) {
+        return;
+    }
+
+    echo '<nav class="breadcrumbs" aria-label="Breadcrumb">';
+    echo '<ol class="breadcrumb-list">';
+
+    $total_items = count($unique_breadcrumbs);
+
+    foreach ($unique_breadcrumbs as $index => $crumb) {
+        $is_last = ($index === $total_items - 1);
+        $label = esc_html(trim($crumb['label']));
+        $url = isset($crumb['url']) && !empty($crumb['url']) ? $crumb['url'] : '';
+
+        // Skip if label is still empty after trimming
+        if (empty($label)) {
+            continue;
+        }
+
+        $classes = 'breadcrumb-item';
+        if ($is_last) {
+            $classes .= ' active';
+        }
+
+        echo '<li class="' . esc_attr($classes) . '"' . ($is_last ? ' aria-current="page"' : '') . '>';
+
+        if (!$is_last && !empty($url)) {
+            echo '<a href="' . esc_url($url) . '">' . $label . '</a>';
+        } else {
+            echo '<span>' . $label . '</span>';
+        }
+
+        echo '</li>';
     }
     
     echo '</ol>';
@@ -261,7 +378,7 @@ function tavaled_get_archive_title() {
  * Check if current page is a custom post type
  */
 function tavaled_is_custom_post_type() {
-    $custom_post_types = array('san-pham', 'du-an', 'giai-phap', 'tuyen-dung');
+    $custom_post_types = array('du-an', 'giai-phap', 'tuyen-dung');
     return is_singular($custom_post_types) || is_post_type_archive($custom_post_types);
 }
 
