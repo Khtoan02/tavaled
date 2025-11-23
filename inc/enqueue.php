@@ -137,6 +137,78 @@ function tavaled_enqueue_scripts() {
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('tavaled_nonce'),
     ));
+
+    // Enqueue CSS và JS cho trang Màn Hình LED
+    if (is_page_template('template-man-hinh-led.php')) {
+        // CSS cho trang Màn Hình LED
+        if (file_exists(get_template_directory() . '/assets/css/led-screen-page.css')) {
+            wp_enqueue_style(
+                'tavaled-led-screen-page',
+                get_template_directory_uri() . '/assets/css/led-screen-page.css',
+                array('tavaled-style', 'tavaled-main'),
+                TAVALED_THEME_VERSION
+            );
+        }
+
+        // JS cho trang Màn Hình LED
+        if (file_exists(get_template_directory() . '/assets/js/led-screen-page.js')) {
+            wp_enqueue_script(
+                'tavaled-led-screen-page',
+                get_template_directory_uri() . '/assets/js/led-screen-page.js',
+                array('jquery', 'tavaled-main'),
+                TAVALED_THEME_VERSION,
+                true
+            );
+        }
+    }
+
+    // Enqueue CSS và JS cho trang Hệ Thống Âm Thanh
+    if (is_page_template('template-he-thong-am-thanh.php')) {
+        // CSS cho trang Hệ Thống Âm Thanh
+        if (file_exists(get_template_directory() . '/assets/css/audio-system-page.css')) {
+            wp_enqueue_style(
+                'tavaled-audio-system-page',
+                get_template_directory_uri() . '/assets/css/audio-system-page.css',
+                array('tavaled-style', 'tavaled-main'),
+                TAVALED_THEME_VERSION
+            );
+        }
+
+        // JS cho trang Hệ Thống Âm Thanh
+        if (file_exists(get_template_directory() . '/assets/js/audio-system-page.js')) {
+            wp_enqueue_script(
+                'tavaled-audio-system-page',
+                get_template_directory_uri() . '/assets/js/audio-system-page.js',
+                array('jquery', 'tavaled-main'),
+                TAVALED_THEME_VERSION,
+                true
+            );
+        }
+    }
+
+    // Enqueue CSS và JS cho trang Hệ Thống Ánh Sáng
+    if (is_page_template('template-he-thong-anh-sang.php')) {
+        // CSS cho trang Hệ Thống Ánh Sáng
+        if (file_exists(get_template_directory() . '/assets/css/lighting-system-page.css')) {
+            wp_enqueue_style(
+                'tavaled-lighting-system-page',
+                get_template_directory_uri() . '/assets/css/lighting-system-page.css',
+                array('tavaled-style', 'tavaled-main'),
+                TAVALED_THEME_VERSION
+            );
+        }
+
+        // JS cho trang Hệ Thống Ánh Sáng
+        if (file_exists(get_template_directory() . '/assets/js/lighting-system-page.js')) {
+            wp_enqueue_script(
+                'tavaled-lighting-system-page',
+                get_template_directory_uri() . '/assets/js/lighting-system-page.js',
+                array('jquery', 'tavaled-main'),
+                TAVALED_THEME_VERSION,
+                true
+            );
+        }
+    }
 }
 
 /**

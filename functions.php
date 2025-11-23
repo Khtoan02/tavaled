@@ -24,6 +24,7 @@ require_once TAVALED_THEME_DIR . '/inc/consultation-manager.php';
 require_once TAVALED_THEME_DIR . '/inc/custom-taxonomies.php';
 require_once TAVALED_THEME_DIR . '/inc/woocommerce-sample-data.php';
 require_once TAVALED_THEME_DIR . '/inc/helpers.php';
+require_once TAVALED_THEME_DIR . '/inc/product-card-helper.php';
 require_once TAVALED_THEME_DIR . '/inc/acf-blog-cta-fields.php';
 
 /**
