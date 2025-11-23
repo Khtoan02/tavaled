@@ -193,28 +193,28 @@ get_header();
                             <div class="stat-icon">
                                 <i class="fas fa-tv"></i>
                             </div>
-                            <div class="stat-number" data-count="1000">0</div>
+                            <div class="stat-number" data-count="120">0</div>
                             <div class="stat-label">Sản phẩm đa dạng</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-users"></i>
                             </div>
-                            <div class="stat-number" data-count="500">0</div>
+                            <div class="stat-number" data-count="1800">0</div>
                             <div class="stat-label">Khách hàng hài lòng</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-project-diagram"></i>
                             </div>
-                            <div class="stat-number" data-count="500">0</div>
+                            <div class="stat-number" data-count="1200">0</div>
                             <div class="stat-label">Dự án thành công</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>
-                            <div class="stat-number" data-count="5">0</div>
+                            <div class="stat-number" data-count="8">0</div>
                             <div class="stat-label">Năm kinh nghiệm</div>
                         </div>
                     </div>

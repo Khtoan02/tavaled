@@ -17,6 +17,7 @@
     initAnimations();
     initCounters();
     initHeroCounters();
+    initAboutCounters();
     initProductFilter();
     initProductsTabs();
     initProductsCarousel();
@@ -347,6 +348,75 @@
         }
       }
     });
+  }
+
+  // About section counter animation
+  function initAboutCounters() {
+    var aboutCounters = $(".about-stats .stat-number");
+    var counted = false;
+
+    function startAboutCounting() {
+      if (counted) return;
+
+      aboutCounters.each(function () {
+        var $this = $(this);
+        var countTo = parseInt($this.attr("data-count"));
+        var duration = 2000;
+        var startTime = null;
+
+        function animateCounter(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var currentCount = Math.floor(progress * countTo);
+
+          $this.text(currentCount + (countTo >= 100 ? "+" : ""));
+
+          if (progress < 1) {
+            requestAnimationFrame(animateCounter);
+          } else {
+            $this.text(countTo + (countTo >= 100 ? "+" : ""));
+          }
+        }
+
+        requestAnimationFrame(animateCounter);
+      });
+
+      counted = true;
+    }
+
+    // Check if about counters are in view using Intersection Observer for better performance
+    if (aboutCounters.length) {
+      var aboutSection = $(".about-mission-section");
+      if (aboutSection.length) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting && !counted) {
+                startAboutCounting();
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          {
+            threshold: 0.3,
+          }
+        );
+
+        observer.observe(aboutSection[0]);
+      }
+
+      // Fallback for older browsers
+      $(window).on("scroll", function () {
+        if (!counted && aboutSection.length) {
+          var aboutTop = aboutSection.offset().top;
+          var windowBottom = $(window).scrollTop() + $(window).height();
+
+          if (windowBottom > aboutTop + 200) {
+            startAboutCounting();
+          }
+        }
+      });
+    }
   }
 
   // Product filter functionality

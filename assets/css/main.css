@@ -6,14 +6,16 @@
 .mobile-menu {
   position: fixed;
   top: 0;
-  right: -300px;
-  width: 300px;
+  right: -320px;
+  width: 320px;
+  max-width: 85vw;
   height: 100vh;
   background: var(--color-white);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
   transition: right var(--transition-normal);
   z-index: 1001;
   overflow-y: auto;
+  padding: 1rem 0;
 }
 
 body.mobile-menu-active .mobile-menu {
@@ -387,42 +389,69 @@ body.mobile-menu-active .mobile-menu-overlay {
 }
 
 @media (max-width: 768px) {
-  /* Base font size 11px cho mobile */
+  /* Base font size 14px cho mobile - tối ưu cho dễ đọc */
   html {
-    font-size: 11px;
+    font-size: 14px;
   }
 
   body {
-    font-size: 0.6875rem; /* 11px */
+    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    line-height: 1.6;
   }
 
   /* Mobile Menu */
   .mobile-menu {
     width: 280px;
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.875rem; /* 14px */
   }
 
   .mobile-menu ul li a {
-    font-size: 0.6875rem; /* 11px */
-    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem; /* 14px */
+    padding: 0.875rem 1.25rem;
+    min-height: 44px; /* Touch target */
+    display: flex;
+    align-items: center;
   }
 
   /* Popup */
+  .popup-overlay {
+    padding: 1rem;
+    align-items: flex-end;
+  }
+
   .popup-content {
-    max-width: 95%;
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
     padding: 1.5rem;
+    transform: translateY(100%);
+  }
+
+  .popup-overlay.active .popup-content {
+    transform: translateY(0);
   }
 
   .popup-close {
-    top: 10px;
-    right: 10px;
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     font-size: 1.25rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Form Messages */
   .form-message {
-    padding: 0.75rem;
-    font-size: 0.6875rem; /* 11px */
+    padding: 0.875rem;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
   }
 
   /* Back to Top */
@@ -460,9 +489,13 @@ body.mobile-menu-active .mobile-menu-overlay {
 
   .pagination-wrapper .pagination-item a,
   .pagination-wrapper .pagination-item span {
-    min-width: 36px;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.6875rem; /* 11px */
+    min-width: 44px; /* Touch target */
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem; /* 14px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Breadcrumbs */
@@ -471,7 +504,7 @@ body.mobile-menu-active .mobile-menu-overlay {
   }
 
   .breadcrumb-list {
-    font-size: 0.625rem; /* 10px */
+    font-size: 0.8125rem; /* 13px */
     gap: 0.5rem;
   }
 
@@ -485,13 +518,14 @@ body.mobile-menu-active .mobile-menu-overlay {
   }
 
   .archive-eyebrow {
-    font-size: 0.625rem; /* 10px */
+    font-size: 0.75rem; /* 12px */
     margin-bottom: 0.625rem;
   }
 
   .blog-archive-header .archive-description {
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.875rem; /* 14px */
     margin-top: 0.875rem;
+    line-height: 1.6;
   }
 
   .blog-loop-container {
@@ -504,7 +538,8 @@ body.mobile-menu-active .mobile-menu-overlay {
   }
 
   .category-simple-description {
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.6;
   }
 
   /* Search Results */
@@ -520,18 +555,23 @@ body.mobile-menu-active .mobile-menu-overlay {
   }
 
   .result-content {
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.6;
   }
 
   /* FAQ */
   .faq-question {
-    padding: 0.875rem;
-    font-size: 0.6875rem; /* 11px */
+    padding: 1rem;
+    font-size: 0.875rem; /* 14px */
+    min-height: 44px; /* Touch target */
+    display: flex;
+    align-items: center;
   }
 
   .faq-answer {
-    padding: 0 0.875rem 0.875rem;
-    font-size: 0.6875rem; /* 11px */
+    padding: 0 1rem 1rem;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.6;
   }
 
   .faq-toggle {
