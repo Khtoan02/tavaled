@@ -27,13 +27,13 @@
             <div class="container">
                 <div class="header-top-content">
                     <div class="header-top-left">
-                        <div class="top-info-item">
+                        <div class="top-info-item working-hours">
                             <i class="fas fa-clock"></i>
                             <span>Thứ 2 - Thứ 6: 8:00 - 17:30</span>
                         </div>
                         <div class="top-info-item">
                             <i class="fas fa-envelope"></i>
-                            <span>Hỗ trợ 24/7: support@tavaled.com</span>
+                            <span>Hỗ trợ 24/7: <?php echo esc_html(tavaled_get_primary_email()); ?></span>
                         </div>
                     </div>
                     <div class="header-top-right">
@@ -85,8 +85,8 @@
                     <!-- Right: Contact & CTA -->
                     <div class="header-contact">
                         <?php
-                        $phone = tavaled_get_option('phone_number', '0123 456 789');
-                        $email = tavaled_get_option('email_address', 'support@tavaled.vn');
+                        $phone = tavaled_get_primary_phone();
+                        $email = tavaled_get_primary_email();
                         ?>
                         <div class="contact-info-unified">
                             <div class="contact-lines">
@@ -154,13 +154,13 @@
                     <!-- Right: Company Info -->
                     <div class="company-info">
                         <div class="company-item">
-                            <a href="/chi-nhanh" class="company-link">
+                            <a href="<?php echo esc_url(get_permalink(get_page_by_path('lien-he')) ?: home_url('/lien-he')); ?>" class="company-link">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span>Trụ sở & Chi nhánh</span>
                             </a>
                         </div>
                         <div class="company-item">
-                            <a href="/ho-so-nang-luc" class="company-link">
+                            <a href="<?php echo esc_url(get_permalink(get_page_by_path('lien-he')) ?: home_url('/lien-he')); ?>" class="company-link">
                                 <i class="fas fa-award"></i>
                                 <span>Hồ sơ năng lực</span>
                             </a>

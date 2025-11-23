@@ -74,14 +74,9 @@
                     <div class="footer-section solutions">
                         <h4 class="footer-title">Giải pháp & Dịch vụ</h4>
                         <ul class="footer-menu">
-                            <li><a href="/giai-phap-hien-thi">Màn hình LED</a></li>
-                            <li><a href="/giai-phap-am-thanh">Thiết bị âm thanh</a></li>
-                            <li><a href="/giai-phap-anh-sang">Thiết bị ánh sáng</a></li>
-                            <li><a href="/den-led-duong">Đèn LED đường</a></li>
-                            <li><a href="/den-led-nha-xuong">Đèn LED nhà xưởng</a></li>
-                            <li><a href="/den-led-van-phong">Đèn LED văn phòng</a></li>
-                            <li><a href="/den-led-san-vuon">Đèn LED sân vườn</a></li>
-                            <li><a href="/den-led-trang-tri">Đèn LED trang trí</a></li>
+                            <li><a href="/giai-phap-hien-thi">Giải pháp hiển thị</a></li>
+                            <li><a href="/giai-phap-anh-sang">Giải pháp ánh sáng</a></li>
+                            <li><a href="/giai-phap-am-thanh">Giải pháp âm thanh</a></li>
                         </ul>
                         
                         <div class="service-highlights">
@@ -103,32 +98,17 @@
                     <!-- Company Information -->
                     <div class="footer-section company-details">
                         <h4 class="footer-title">Thông tin công ty</h4>
+                        <?php
+                        $contact_page_url = get_permalink(get_page_by_path('lien-he')) ?: home_url('/lien-he');
+                        ?>
                         <ul class="footer-menu">
-                            <li><a href="/gioi-thieu">Giới thiệu</a></li>
-                            <li><a href="/ho-so-nang-luc">Hồ sơ năng lực</a></li>
-                            <li><a href="/du-an-tieu-bieu">Dự án tiêu biểu</a></li>
-                            <li><a href="/tin-tuc">Tin tức & Sự kiện</a></li>
-                            <li><a href="/tuyen-dung">Tuyển dụng</a></li>
-                            <li><a href="/lien-he">Liên hệ</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Giới thiệu</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Hồ sơ năng lực</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Dự án tiêu biểu</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Tin tức & Sự kiện</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Tuyển dụng</a></li>
+                            <li><a href="<?php echo esc_url($contact_page_url); ?>">Liên hệ</a></li>
                         </ul>
-                        
-                        <div class="certifications">
-                            <h5>Chứng nhận & Giải thưởng</h5>
-                            <div class="cert-items">
-                                <div class="cert-item">
-                                    <i class="fas fa-certificate"></i>
-                                    <span>ISO 9001:2015</span>
-                                </div>
-                                <div class="cert-item">
-                                    <i class="fas fa-award"></i>
-                                    <span>Top 10 LED Việt Nam</span>
-                                </div>
-                                <div class="cert-item">
-                                    <i class="fas fa-medal"></i>
-                                    <span>Giải thưởng chất lượng</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- Contact Information -->
@@ -142,7 +122,7 @@
                                 </div>
                                 <div class="contact-content">
                                     <h6>Trụ sở chính</h6>
-                                    <p>123 Đường ABC, Quận 1, TP.HCM</p>
+                                    <p><?php echo esc_html(tavaled_get_primary_address()); ?></p>
                                 </div>
                             </div>
                             
@@ -153,9 +133,18 @@
                                 <div class="contact-content">
                                     <h6>Điện thoại</h6>
                                     <p>
-                                        <a href="tel:<?php echo tavaled_format_phone(tavaled_get_option('phone_number', '0123 456 789')); ?>">
-                                            <?php echo esc_html(tavaled_get_option('phone_number', '0123 456 789')); ?>
-                                        </a>
+                                        <?php
+                                        $phones = tavaled_get_company_phones();
+                                        if (!empty($phones)) {
+                                            foreach ($phones as $index => $phone) {
+                                                if ($index > 0) echo '<br>';
+                                                echo '<a href="tel:' . esc_attr(tavaled_format_phone($phone)) . '">' . esc_html($phone) . '</a>';
+                                            }
+                                        } else {
+                                            $phone = tavaled_get_primary_phone();
+                                            echo '<a href="tel:' . esc_attr(tavaled_format_phone($phone)) . '">' . esc_html($phone) . '</a>';
+                                        }
+                                        ?>
                                     </p>
                                 </div>
                             </div>
@@ -167,9 +156,18 @@
                                 <div class="contact-content">
                                     <h6>Email</h6>
                                     <p>
-                                        <a href="mailto:<?php echo esc_attr(tavaled_get_option('email_address', 'support@tavaled.vn')); ?>">
-                                            <?php echo esc_html(tavaled_get_option('email_address', 'support@tavaled.vn')); ?>
-                                        </a>
+                                        <?php
+                                        $emails = tavaled_get_company_emails();
+                                        if (!empty($emails)) {
+                                            foreach ($emails as $index => $email) {
+                                                if ($index > 0) echo '<br>';
+                                                echo '<a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a>';
+                                            }
+                                        } else {
+                                            $email = tavaled_get_primary_email();
+                                            echo '<a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a>';
+                                        }
+                                        ?>
                                     </p>
                                 </div>
                             </div>

@@ -132,7 +132,7 @@ get_header();
                         <p><?php esc_html_e('Nếu bạn không tìm thấy câu trả lời cho câu hỏi của mình, hãy liên hệ với chúng tôi.', 'tavaled-theme'); ?></p>
                         
                         <div class="support-options">
-                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_option('phone_number', '0123456789')); ?>" class="glass-button">
+                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_primary_phone()); ?>" class="glass-button">
                                 <i class="fas fa-phone"></i>
                                 <?php esc_html_e('Gọi ngay', 'tavaled-theme'); ?>
                             </a>

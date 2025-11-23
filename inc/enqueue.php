@@ -132,8 +132,9 @@ function tavaled_enqueue_scripts() {
         wp_enqueue_script('comment-reply');
     }
 
-    // Localize script for AJAX
-    wp_localize_script('tavaled-main', 'tavaled_ajax', array(
+    // Localize script for AJAX - sử dụng handle đúng tùy theo file có tồn tại hay không
+    $main_script_handle = file_exists(get_template_directory() . '/assets/js/main.js') ? 'tavaled-main' : 'tavaled-main-inline';
+    wp_localize_script($main_script_handle, 'tavaled_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('tavaled_nonce'),
     ));

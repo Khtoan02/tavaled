@@ -508,9 +508,9 @@
 }
 
 @media (max-width: 768px) {
-  /* Font size 14px cho mobile - tối ưu cho dễ đọc */
+  /* Font size 11px cho mobile */
   .lighting-system-page {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.6875rem; /* 11px */
   }
 
   .lighting-system-page .lighting-system-hero {
@@ -518,7 +518,7 @@
   }
 
   .lighting-system-page .lighting-system-eyebrow {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
     letter-spacing: 0.15rem;
   }
 
@@ -528,7 +528,7 @@
   }
 
   .lighting-system-page .lighting-system-lead {
-    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    font-size: 0.6875rem; /* 11px */
     line-height: 1.5;
   }
 
@@ -537,7 +537,7 @@
   }
 
   .lighting-system-page .lighting-system-metric-label {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
   }
 
   .lighting-system-page .lighting-system-hero-actions {
@@ -548,10 +548,9 @@
   .lighting-system-page .lighting-system-hero-actions .lighting-system-btn-primary,
   .lighting-system-page .lighting-system-hero-actions .lighting-system-btn-secondary {
     width: 100%;
-    min-height: 48px;
     justify-content: center;
-    padding: 0.875rem 1.5rem;
-    font-size: clamp(0.9375rem, 2.5vw, 1.125rem); /* 15px - 18px */
+    padding: 0.625rem 1.25rem;
+    font-size: 0.6875rem; /* 11px */
   }
 
   .lighting-system-page .lighting-system-highlight-card {
@@ -559,7 +558,7 @@
   }
 
   .lighting-system-page .lighting-system-highlight-eyebrow {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
   }
 
   .lighting-system-page .lighting-system-highlight-title {
@@ -567,12 +566,12 @@
   }
 
   .lighting-system-page .lighting-system-highlight-list li {
-    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    font-size: 0.6875rem; /* 11px */
     gap: 0.5rem;
   }
 
   .lighting-system-page .lighting-system-highlight-meta {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
   }
 
   .lighting-system-page .lighting-system-category-section {
@@ -580,7 +579,7 @@
   }
 
   .lighting-system-page .lighting-system-section-eyebrow {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
     letter-spacing: 0.15rem;
   }
 
@@ -589,12 +588,12 @@
   }
 
   .lighting-system-page .lighting-system-section-description {
-    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    font-size: 0.6875rem; /* 11px */
   }
 
   .lighting-system-page .lighting-system-meta-count,
   .lighting-system-page .lighting-system-meta-link {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
   }
 
   .lighting-system-page .lighting-system-category-slider {
@@ -629,7 +628,7 @@
   }
 
   .lighting-system-page .lighting-system-empty-content p {
-    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    font-size: 0.6875rem; /* 11px */
   }
 
   .lighting-system-page .lighting-system-cta {
@@ -642,7 +641,7 @@
   }
 
   .lighting-system-page .lighting-system-cta-eyebrow {
-    font-size: clamp(0.75rem, 2vw, 0.9375rem); /* 12px - 15px */
+    font-size: 0.625rem; /* 10px */
   }
 
   .lighting-system-page .lighting-system-cta-title {
@@ -650,7 +649,7 @@
   }
 
   .lighting-system-page .lighting-system-cta-content p {
-    font-size: clamp(0.875rem, 2.5vw, 1rem); /* 14px - 16px */
+    font-size: 0.6875rem; /* 11px */
   }
 
   .lighting-system-page .lighting-system-cta-actions {
@@ -661,10 +660,9 @@
   .lighting-system-page .lighting-system-cta-actions .lighting-system-btn-primary,
   .lighting-system-page .lighting-system-cta-actions .lighting-system-btn-secondary {
     width: 100%;
-    min-height: 48px;
     justify-content: center;
-    padding: 0.875rem 1.5rem;
-    font-size: clamp(0.9375rem, 2.5vw, 1.125rem); /* 15px - 18px */
+    padding: 0.625rem 1.25rem;
+    font-size: 0.6875rem; /* 11px */
   }
 }
 

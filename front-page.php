@@ -186,6 +186,46 @@ get_header();
                                 <p><strong>Chất lượng:</strong> Sản phẩm đạt chuẩn quốc tế, bền bỉ theo thời gian. <strong>Uy tín:</strong> Cam kết thực hiện đúng như đã hứa. <strong>Chuyên nghiệp:</strong> Đội ngũ giàu kinh nghiệm, dịch vụ tận tâm. <strong>Đổi mới:</strong> Luôn cập nhật công nghệ mới nhất.</p>
                             </div>
                         </div>
+                        
+                        <div class="about-item">
+                            <div class="about-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="about-content-text">
+                                <h3>Đồng bộ thông số dự án</h3>
+                                <p>Chúng tôi đảm bảo đồng bộ hóa toàn bộ thông số kỹ thuật cho mọi dự án, từ thiết kế đến thi công và bảo trì, đảm bảo tính nhất quán và hiệu quả tối đa.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-item">
+                            <div class="about-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="about-content-text">
+                                <h3>Kinh nghiệm</h3>
+                                <p>Với nhiều năm kinh nghiệm trong ngành, chúng tôi đã thực hiện hàng trăm dự án thành công, từ các dự án nhỏ đến các dự án quy mô lớn trên toàn quốc.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-item">
+                            <div class="about-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                            <div class="about-content-text">
+                                <h3>Khách hàng</h3>
+                                <p>Chúng tôi tự hào phục vụ hàng trăm khách hàng uy tín, từ các doanh nghiệp nhỏ đến các tập đoàn lớn, với tỷ lệ hài lòng và quay lại sử dụng dịch vụ rất cao.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-item">
+                            <div class="about-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="about-content-text">
+                                <h3>Sản phẩm với thông số</h3>
+                                <p>Tất cả sản phẩm của chúng tôi đều được cung cấp đầy đủ thông số kỹ thuật chi tiết, giúp khách hàng dễ dàng lựa chọn và so sánh sản phẩm phù hợp nhất với nhu cầu của mình.</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="about-stats">
@@ -403,7 +443,7 @@ get_header();
                                 <i class="fas fa-headset"></i>
                                 <span>Tư vấn miễn phí</span>
                             </a>
-                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_option('phone_number', '0123456789')); ?>" class="btn-secondary">
+                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_primary_phone()); ?>" class="btn-secondary">
                                 <i class="fas fa-phone"></i>
                                 <span>Gọi ngay</span>
                             </a>
@@ -921,9 +961,9 @@ get_header();
                             <i class="fas fa-headset"></i>
                             <span>Nhận tư vấn miễn phí</span>
                         </a>
-                        <a href="tel:<?php echo tavaled_format_phone(tavaled_get_option('phone_number', '0123456789')); ?>" class="btn-secondary">
+                        <a href="tel:<?php echo tavaled_format_phone(tavaled_get_primary_phone()); ?>" class="btn-secondary">
                             <i class="fas fa-phone"></i>
-                            <span>Gọi ngay: <?php echo tavaled_get_option('phone_number', '0123 456 789'); ?></span>
+                            <span>Gọi ngay: <?php echo esc_html(tavaled_get_primary_phone()); ?></span>
                         </a>
                     </div>
                 </div>

@@ -26,6 +26,7 @@ require_once TAVALED_THEME_DIR . '/inc/woocommerce-sample-data.php';
 require_once TAVALED_THEME_DIR . '/inc/helpers.php';
 require_once TAVALED_THEME_DIR . '/inc/product-card-helper.php';
 require_once TAVALED_THEME_DIR . '/inc/acf-blog-cta-fields.php';
+require_once TAVALED_THEME_DIR . '/inc/admin-company-info.php';
 
 /**
  * Đảm bảo WooCommerce có trang cửa hàng sử dụng slug /san-pham
@@ -453,7 +454,10 @@ function tavaled_handle_contact_form() {
     }
     
     // Prepare email
-    $to = tavaled_get_option('email_address', get_option('admin_email'));
+    $to = tavaled_get_primary_email();
+    if (empty($to)) {
+        $to = get_option('admin_email');
+    }
     $email_subject = 'Nhận báo giá mới - ' . get_bloginfo('name');
     $email_message = "Bạn có yêu cầu nhận báo giá mới:\n\n";
     $email_message .= "Họ và tên: " . $name . "\n";
@@ -543,7 +547,10 @@ function tavaled_handle_phone_cta() {
     update_post_meta($consultation_id, '_consultation_type', 'phone_cta');
     
     // Prepare email
-    $to = tavaled_get_option('email_address', get_option('admin_email'));
+    $to = tavaled_get_primary_email();
+    if (empty($to)) {
+        $to = get_option('admin_email');
+    }
     $subject = 'Yêu cầu tư vấn mới - ' . get_bloginfo('name');
     $message = "Bạn có yêu cầu tư vấn mới:\n\n";
     $message .= "Số điện thoại: " . $phone . "\n";

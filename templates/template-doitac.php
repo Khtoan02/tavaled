@@ -214,7 +214,7 @@ get_header();
                             <a href="<?php echo esc_url(home_url('/lien-he')); ?>" class="glass-button">
                                 <?php esc_html_e('Đăng ký hợp tác', 'tavaled-theme'); ?>
                             </a>
-                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_option('phone_number', '0123456789')); ?>" class="glass-button secondary">
+                            <a href="tel:<?php echo tavaled_format_phone(tavaled_get_primary_phone()); ?>" class="glass-button secondary">
                                 <i class="fas fa-phone"></i>
                                 <?php esc_html_e('Gọi ngay', 'tavaled-theme'); ?>
                             </a>

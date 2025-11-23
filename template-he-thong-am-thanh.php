@@ -277,9 +277,9 @@ if ($audio_tag && $is_woocommerce_active) {
                             <i class="fas fa-paper-plane"></i>
                             <span><?php esc_html_e('Gửi yêu cầu báo giá', 'tavaled-theme'); ?></span>
                         </a>
-                        <a href="tel:<?php echo esc_attr(tavaled_format_phone(tavaled_get_option('phone_number', '0123456789'))); ?>" class="audio-system-btn-secondary">
+                        <a href="tel:<?php echo esc_attr(tavaled_format_phone(tavaled_get_primary_phone())); ?>" class="audio-system-btn-secondary">
                             <i class="fas fa-phone"></i>
-                            <span><?php echo esc_html(tavaled_get_option('phone_number', '0123 456 789')); ?></span>
+                            <span><?php echo esc_html(tavaled_get_primary_phone()); ?></span>
                         </a>
                     </div>
                 </div>

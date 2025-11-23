@@ -108,7 +108,7 @@ while (have_posts()) :
     }
 
     $product_id   = $product->get_id();
-    $contact_phone = tavaled_get_option('phone_number', '096 123 4567');
+    $contact_phone = tavaled_get_primary_phone();
     
     // Lấy tên danh mục đầu tiên
     $product_categories = wp_get_post_terms($product_id, 'product_cat', array('orderby' => 'term_order', 'number' => 1));
@@ -237,7 +237,7 @@ while (have_posts()) :
                             <i class="fas fa-envelope-open-text"></i>
                             <span><?php esc_html_e('Gửi yêu cầu', 'tavaled-theme'); ?></span>
                         </a>
-                        <a class="btn-outline" href="mailto:<?php echo esc_attr(tavaled_get_option('email', 'hello@tavaled.vn')); ?>">
+                        <a class="btn-outline" href="mailto:<?php echo esc_attr(tavaled_get_primary_email()); ?>">
                             <i class="fas fa-at"></i>
                             <span><?php esc_html_e('Email cho chúng tôi', 'tavaled-theme'); ?></span>
                         </a>
@@ -248,8 +248,8 @@ while (have_posts()) :
 
         <?php
         // Lấy sản phẩm liên quan: ưu tiên cùng danh mục, sau đó bổ sung từ danh mục khác
-        $related_ids = wc_get_related_products($product_id, 4);
-        $target_count = 4; // Số lượng sản phẩm muốn hiển thị
+        $related_ids = wc_get_related_products($product_id, 2);
+        $target_count = 2; // Số lượng sản phẩm muốn hiển thị
         
         // Nếu không đủ sản phẩm cùng danh mục, lấy thêm từ danh mục khác
         if (count($related_ids) < $target_count) {

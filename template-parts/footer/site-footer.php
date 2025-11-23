@@ -87,34 +87,70 @@
                 <h3><?php esc_html_e('Liên hệ', 'tavaled-theme'); ?></h3>
                 <ul class="contact-info">
                     <?php
-                    $address = tavaled_get_option('company_address');
-                    if ($address) :
-                        ?>
-                        <li>
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span><?php echo esc_html($address); ?></span>
-                        </li>
-                        <?php
+                    $addresses = tavaled_get_company_addresses();
+                    if (!empty($addresses)) :
+                        foreach ($addresses as $address) :
+                            ?>
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span><?php echo esc_html($address); ?></span>
+                            </li>
+                            <?php
+                        endforeach;
+                    else :
+                        $address = tavaled_get_primary_address();
+                        if ($address) :
+                            ?>
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span><?php echo esc_html($address); ?></span>
+                            </li>
+                            <?php
+                        endif;
                     endif;
                     
-                    $phone = tavaled_get_option('phone_number');
-                    if ($phone) :
-                        ?>
-                        <li>
-                            <i class="fas fa-phone"></i>
-                            <a href="tel:<?php echo tavaled_format_phone($phone); ?>"><?php echo esc_html($phone); ?></a>
-                        </li>
-                        <?php
+                    $phones = tavaled_get_company_phones();
+                    if (!empty($phones)) :
+                        foreach ($phones as $phone) :
+                            ?>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:<?php echo tavaled_format_phone($phone); ?>"><?php echo esc_html($phone); ?></a>
+                            </li>
+                            <?php
+                        endforeach;
+                    else :
+                        $phone = tavaled_get_primary_phone();
+                        if ($phone) :
+                            ?>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:<?php echo tavaled_format_phone($phone); ?>"><?php echo esc_html($phone); ?></a>
+                            </li>
+                            <?php
+                        endif;
                     endif;
                     
-                    $email = tavaled_get_option('email_address');
-                    if ($email) :
-                        ?>
-                        <li>
-                            <i class="fas fa-envelope"></i>
-                            <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a>
-                        </li>
-                        <?php
+                    $emails = tavaled_get_company_emails();
+                    if (!empty($emails)) :
+                        foreach ($emails as $email) :
+                            ?>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a>
+                            </li>
+                            <?php
+                        endforeach;
+                    else :
+                        $email = tavaled_get_primary_email();
+                        if ($email) :
+                            ?>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a>
+                            </li>
+                            <?php
+                        endif;
                     endif;
                     ?>
                 </ul>

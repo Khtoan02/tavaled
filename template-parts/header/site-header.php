@@ -46,7 +46,7 @@
                 
                 <!-- Phone -->
                 <?php
-                $phone = tavaled_get_option('phone_number');
+                $phone = tavaled_get_primary_phone();
                 if ($phone) :
                     ?>
                     <a href="tel:<?php echo tavaled_format_phone($phone); ?>" class="header-phone">
