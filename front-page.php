@@ -72,21 +72,6 @@ get_header();
                                 <span>Nhận báo giá miễn phí</span>
                             </a>
                         </div>
-                        
-                        <div class="hero-trust">
-                            <div class="trust-item">
-                                <i class="fas fa-users"></i>
-                                <span>500+ Khách hàng tin tưởng</span>
-                            </div>
-                            <div class="trust-item">
-                                <i class="fas fa-project-diagram"></i>
-                                <span>500+ Dự án hoàn thành</span>
-                            </div>
-                            <div class="trust-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Phục vụ toàn quốc</span>
-                            </div>
-                        </div>
                     </div>
                     
                     <div class="hero-visual">
@@ -123,15 +108,15 @@ get_header();
                             
                             <div class="hero-stats">
                                 <div class="stat-item">
-                                    <div class="stat-number" data-count="500">0</div>
+                                    <div class="stat-number">500+</div>
                                     <div class="stat-label">Dự án hoàn thành</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number" data-count="500">0</div>
+                                    <div class="stat-number">500+</div>
                                     <div class="stat-label">Khách hàng tin tưởng</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number" data-count="5">0</div>
+                                    <div class="stat-number">5</div>
                                     <div class="stat-label">Năm kinh nghiệm</div>
                                 </div>
                             </div>
@@ -186,46 +171,6 @@ get_header();
                                 <p><strong>Chất lượng:</strong> Sản phẩm đạt chuẩn quốc tế, bền bỉ theo thời gian. <strong>Uy tín:</strong> Cam kết thực hiện đúng như đã hứa. <strong>Chuyên nghiệp:</strong> Đội ngũ giàu kinh nghiệm, dịch vụ tận tâm. <strong>Đổi mới:</strong> Luôn cập nhật công nghệ mới nhất.</p>
                             </div>
                         </div>
-                        
-                        <div class="about-item">
-                            <div class="about-icon">
-                                <i class="fas fa-sync-alt"></i>
-                            </div>
-                            <div class="about-content-text">
-                                <h3>Đồng bộ thông số dự án</h3>
-                                <p>Chúng tôi đảm bảo đồng bộ hóa toàn bộ thông số kỹ thuật cho mọi dự án, từ thiết kế đến thi công và bảo trì, đảm bảo tính nhất quán và hiệu quả tối đa.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="about-item">
-                            <div class="about-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="about-content-text">
-                                <h3>Kinh nghiệm</h3>
-                                <p>Với nhiều năm kinh nghiệm trong ngành, chúng tôi đã thực hiện hàng trăm dự án thành công, từ các dự án nhỏ đến các dự án quy mô lớn trên toàn quốc.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="about-item">
-                            <div class="about-icon">
-                                <i class="fas fa-handshake"></i>
-                            </div>
-                            <div class="about-content-text">
-                                <h3>Khách hàng</h3>
-                                <p>Chúng tôi tự hào phục vụ hàng trăm khách hàng uy tín, từ các doanh nghiệp nhỏ đến các tập đoàn lớn, với tỷ lệ hài lòng và quay lại sử dụng dịch vụ rất cao.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="about-item">
-                            <div class="about-icon">
-                                <i class="fas fa-clipboard-list"></i>
-                            </div>
-                            <div class="about-content-text">
-                                <h3>Sản phẩm với thông số</h3>
-                                <p>Tất cả sản phẩm của chúng tôi đều được cung cấp đầy đủ thông số kỹ thuật chi tiết, giúp khách hàng dễ dàng lựa chọn và so sánh sản phẩm phù hợp nhất với nhu cầu của mình.</p>
-                            </div>
-                        </div>
                     </div>
                     
                     <div class="about-stats">
@@ -233,28 +178,28 @@ get_header();
                             <div class="stat-icon">
                                 <i class="fas fa-tv"></i>
                             </div>
-                            <div class="stat-number" data-count="120">0</div>
+                            <div class="stat-number">120+</div>
                             <div class="stat-label">Sản phẩm đa dạng</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-users"></i>
                             </div>
-                            <div class="stat-number" data-count="1800">0</div>
+                            <div class="stat-number">1800+</div>
                             <div class="stat-label">Khách hàng hài lòng</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-project-diagram"></i>
                             </div>
-                            <div class="stat-number" data-count="1200">0</div>
+                            <div class="stat-number">1200+</div>
                             <div class="stat-label">Dự án thành công</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>
-                            <div class="stat-number" data-count="8">0</div>
+                            <div class="stat-number">8</div>
                             <div class="stat-label">Năm kinh nghiệm</div>
                         </div>
                     </div>
