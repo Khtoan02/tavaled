@@ -378,7 +378,7 @@ function tavaled_get_archive_title() {
  * Check if current page is a custom post type
  */
 function tavaled_is_custom_post_type() {
-    $custom_post_types = array('du-an', 'giai-phap', 'tuyen-dung');
+    $custom_post_types = array('giai-phap', 'tuyen-dung');
     return is_singular($custom_post_types) || is_post_type_archive($custom_post_types);
 }
 
@@ -629,4 +629,126 @@ class Mobile_Walker_Nav_Menu extends Walker_Nav_Menu {
     function end_el(&$output, $item, $depth = 0, $args = null) {
         $output .= "</li>\n";
     }
+}
+
+/**
+ * Build JS-ready project data array from CPT tavaled_project
+ *
+ * Cấu trúc trả về được thiết kế để khớp với mảng mock `projects`
+ * đang dùng trong template-project.php và single-project.php.
+ */
+function tavaled_get_projects_js_data() {
+    $projects = array();
+
+    $query = new WP_Query(array(
+        'post_type'      => 'tavaled_project',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ));
+
+    if (!$query->have_posts()) {
+        return $projects;
+    }
+
+    while ($query->have_posts()) {
+        $query->the_post();
+        $post_id = get_the_ID();
+
+        // Map taxonomy -> category slug (indoor / outdoor / rental...)
+        $cat_terms = wp_get_post_terms($post_id, 'tavaled_project_category', array('fields' => 'slugs'));
+        $category  = !empty($cat_terms) && !is_wp_error($cat_terms) ? $cat_terms[0] : 'indoor';
+
+        // Meta fields (sẽ được form admin map sau)
+        $client   = get_post_meta($post_id, '_tavaled_project_client', true);
+        $location = get_post_meta($post_id, '_tavaled_project_location', true);
+        $area     = get_post_meta($post_id, '_tavaled_project_area', true);
+        $pixel    = get_post_meta($post_id, '_tavaled_project_pixel', true);
+        $year     = get_post_meta($post_id, '_tavaled_project_year', true);
+        $intro    = get_post_meta($post_id, '_tavaled_project_intro', true);
+
+        // Hero + thumb
+        $thumb_url = get_the_post_thumbnail_url($post_id, 'project-thumb');
+        if (!$thumb_url) {
+            $thumb_url = get_the_post_thumbnail_url($post_id, 'large');
+        }
+
+        $hero_id  = get_post_meta($post_id, '_tavaled_project_hero_id', true);
+        $hero_url = $hero_id ? wp_get_attachment_image_url($hero_id, 'banner') : '';
+        if (!$hero_url) {
+            $hero_url = $thumb_url;
+        }
+
+        // Dynamic technical specs (array of label/value)
+        $specs = get_post_meta($post_id, '_tavaled_project_specs', true);
+        if (!is_array($specs)) {
+            $specs = array();
+        }
+
+        // Map một số thông số quen thuộc sang object tech để giữ tương thích với JS cũ
+        $tech = array(
+            'module'  => '',
+            'ic'      => '',
+            'refresh' => '',
+            'nit'     => '',
+        );
+
+        foreach ($specs as $spec) {
+            if (empty($spec['label']) || empty($spec['value'])) {
+                continue;
+            }
+            $label = mb_strtolower($spec['label']);
+            $value = $spec['value'];
+
+            if ($tech['module'] === '' && (strpos($label, 'module') !== false)) {
+                $tech['module'] = $value;
+            } elseif ($tech['ic'] === '' && (strpos($label, 'ic') !== false)) {
+                $tech['ic'] = $value;
+            } elseif ($tech['refresh'] === '' && (strpos($label, 'tần số') !== false || strpos($label, 'refresh') !== false)) {
+                $tech['refresh'] = $value;
+            } elseif ($tech['nit'] === '' && (strpos($label, 'độ sáng') !== false || strpos($label, 'nit') !== false)) {
+                $tech['nit'] = $value;
+            }
+        }
+
+        // Full content HTML (đã qua filter the_content) cho trang single
+        $content_html = apply_filters('the_content', get_post_field('post_content', $post_id));
+
+        // Gallery images (mảng ID -> URL)
+        $gallery_ids = get_post_meta($post_id, '_tavaled_project_gallery_ids', true);
+        if (!is_array($gallery_ids)) {
+            $gallery_ids = array();
+        }
+        $images = array();
+        foreach ($gallery_ids as $attachment_id) {
+            $url = wp_get_attachment_image_url($attachment_id, 'large');
+            if ($url) {
+                $images[] = $url;
+            }
+        }
+
+        $projects[] = array(
+            'id'        => $post_id,
+            'slug'      => get_post_field('post_name', $post_id),
+            'title'     => get_the_title($post_id),
+            'category'  => $category,
+            'client'    => $client,
+            'location'  => $location,
+            'area'      => $area,
+            'pixel'     => $pixel,
+            'year'      => $year,
+            'thumb'     => $thumb_url,
+            'heroImage' => $hero_url,
+            'desc'      => $intro,
+            'tech'      => $tech,
+            'specs'     => $specs,
+            'content'   => $content_html,
+            'images'    => $images,
+        );
+    }
+
+    wp_reset_postdata();
+
+    return $projects;
 }

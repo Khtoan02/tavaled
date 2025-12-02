@@ -15,11 +15,17 @@ if (!defined('ABSPATH')) {
  */
 function tavaled_register_post_types() {
 
-    // Dự án (Projects)
+    /**
+     * Dự án (Projects)
+     *
+     * Trước đây phần dự án dùng hoàn toàn template tĩnh + JS.
+     * Bây giờ đăng ký lại CPT riêng để làm tầng dữ liệu, còn UI quản lý
+     * sẽ dùng các trang admin custom (không dùng màn hình post mặc định của WP).
+     */
     $project_labels = array(
         'name'                  => _x('Dự án', 'Post type general name', 'tavaled-theme'),
         'singular_name'         => _x('Dự án', 'Post type singular name', 'tavaled-theme'),
-        'menu_name'             => _x('Dự án', 'Admin Menu text', 'tavaled-theme'),
+        'menu_name'             => _x('Dự án (core)', 'Admin Menu text', 'tavaled-theme'),
         'name_admin_bar'        => _x('Dự án', 'Add New on Toolbar', 'tavaled-theme'),
         'add_new'               => __('Thêm mới', 'tavaled-theme'),
         'add_new_item'          => __('Thêm dự án mới', 'tavaled-theme'),
@@ -37,19 +43,23 @@ function tavaled_register_post_types() {
         'public'             => true,
         'publicly_queryable' => true,
         'show_ui'            => true,
-        'show_in_menu'       => true,
+        // Ẩn khỏi menu chính để dùng menu custom "Dự án TavaLED"
+        'show_in_menu'       => false,
         'query_var'          => true,
-        'rewrite'            => array('slug' => 'du-an'),
+        'rewrite'            => array(
+            'slug'       => 'du-an-core',
+            'with_front' => false,
+        ),
         'capability_type'    => 'post',
-        'has_archive'        => true,
+        'has_archive'        => false,
         'hierarchical'       => false,
         'menu_position'      => 6,
-        'menu_icon'          => 'dashicons-portfolio',
-        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
-        'show_in_rest'       => true,
+        'menu_icon'          => 'dashicons-screenoptions',
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt'),
+        'show_in_rest'       => false,
     );
 
-    register_post_type('du-an', $project_args);
+    register_post_type('tavaled_project', $project_args);
 
     // Giải pháp (Solutions)
     $solution_labels = array(

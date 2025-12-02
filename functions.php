@@ -26,6 +26,7 @@ require_once TAVALED_THEME_DIR . '/inc/woocommerce-sample-data.php';
 require_once TAVALED_THEME_DIR . '/inc/helpers.php';
 require_once TAVALED_THEME_DIR . '/inc/product-card-helper.php';
 require_once TAVALED_THEME_DIR . '/inc/acf-blog-cta-fields.php';
+require_once TAVALED_THEME_DIR . '/inc/admin-project-manager.php';
 require_once TAVALED_THEME_DIR . '/inc/admin-company-info.php';
 
 /**
@@ -320,6 +321,212 @@ function tavaled_adjust_posts_per_page($query) {
     }
 }
 add_action('pre_get_posts', 'tavaled_adjust_posts_per_page');
+
+// Register rewrite rules for single project pages
+// URL format: /{trang-du-an}/{project-slug}/
+function tavaled_add_project_rewrite_rules() {
+    // Thêm query var trước
+    add_rewrite_tag('%project_slug%', '([^/]+)');
+    
+    // Lấy URL của trang có template-project.php
+    $projectsPage = get_pages(array(
+        'meta_key' => '_wp_page_template',
+        'meta_value' => 'template-project.php',
+        'number' => 1
+    ));
+    
+    if (!empty($projectsPage)) {
+        $projectsPageSlug = get_post_field('post_name', $projectsPage[0]->ID);
+    } else {
+        $pageBySlug = get_page_by_path("du-an-tieu-bieu");
+        if ($pageBySlug) {
+            $projectsPageSlug = get_post_field('post_name', $pageBySlug->ID);
+        } else {
+            // Fallback: thử các slug phổ biến
+            $projectsPageSlug = 'trang-du-an';
+        }
+    }
+    
+    // Thêm rewrite rule: /{trang-du-an}/{slug}/
+    // Priority 'top' để ưu tiên hơn các rules khác
+    add_rewrite_rule(
+        '^' . $projectsPageSlug . '/([^/]+)/?$',
+        'index.php?project_slug=$matches[1]',
+        'top'
+    );
+}
+add_action('init', 'tavaled_add_project_rewrite_rules', 10);
+
+// Template redirect for single project - bắt sớm nhất có thể
+function tavaled_project_template_redirect() {
+    // Chỉ xử lý khi không phải admin và không phải AJAX
+    if (is_admin() || (defined('DOING_AJAX') && DOING_AJAX)) {
+        return;
+    }
+    
+    global $wp_query;
+    
+    // Lấy request URI
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+    $request_path = parse_url($request_uri, PHP_URL_PATH);
+    $path_parts = array_filter(explode('/', trim($request_path, '/')));
+    
+    if (count($path_parts) >= 2) {
+        // Lấy slug của trang dự án
+        $projectsPage = get_pages(array(
+            'meta_key' => '_wp_page_template',
+            'meta_value' => 'template-project.php',
+            'number' => 1
+        ));
+        
+        if (!empty($projectsPage)) {
+            $projectsPageSlug = get_post_field('post_name', $projectsPage[0]->ID);
+        } else {
+            $pageBySlug = get_page_by_path("du-an-tieu-bieu");
+            if ($pageBySlug) {
+                $projectsPageSlug = get_post_field('post_name', $pageBySlug->ID);
+            } else {
+                $projectsPageSlug = 'trang-du-an';
+            }
+        }
+        
+        // Kiểm tra nếu URL có format: /{trang-du-an}/{slug}/
+        if (isset($path_parts[0]) && $path_parts[0] === $projectsPageSlug && isset($path_parts[1])) {
+            $project_slug = $path_parts[1];
+            
+            // Load single-project.php template
+            $template = locate_template('single-project.php');
+            if ($template) {
+                // Set query vars đúng cách
+                $wp_query->is_404 = false;
+                $wp_query->is_page = true;
+                $wp_query->is_singular = true;
+                $wp_query->is_home = false;
+                $wp_query->is_archive = false;
+                
+                // Set query var để JavaScript có thể dùng
+                set_query_var('project_slug', $project_slug);
+                
+                // Tạo fake post object để WordPress không bị lỗi
+                global $post;
+                
+                // Lấy page parent (trang có template-project.php) để dùng làm parent
+                $parent_id = !empty($projectsPage) ? $projectsPage[0]->ID : 0;
+                
+                // Tạo post data array
+                $post_data = array(
+                    'ID' => 0,
+                    'post_author' => 1,
+                    'post_date' => current_time('mysql'),
+                    'post_date_gmt' => current_time('mysql', 1),
+                    'post_content' => '',
+                    'post_title' => 'Project: ' . $project_slug,
+                    'post_excerpt' => '',
+                    'post_status' => 'publish',
+                    'comment_status' => 'closed',
+                    'ping_status' => 'closed',
+                    'post_password' => '',
+                    'post_name' => $project_slug,
+                    'to_ping' => '',
+                    'pinged' => '',
+                    'post_modified' => current_time('mysql'),
+                    'post_modified_gmt' => current_time('mysql', 1),
+                    'post_content_filtered' => '',
+                    'post_parent' => $parent_id,
+                    'guid' => home_url('/' . $projectsPageSlug . '/' . $project_slug . '/'),
+                    'menu_order' => 0,
+                    'post_type' => 'page',
+                    'post_mime_type' => '',
+                    'comment_count' => 0,
+                    'filter' => 'raw'
+                );
+                
+                // Tạo WP_Post object
+                $post = new WP_Post((object) $post_data);
+                
+                // Set vào query
+                $wp_query->posts = array($post);
+                $wp_query->post_count = 1;
+                $wp_query->post = $post;
+                $wp_query->queried_object = $post;
+                $wp_query->queried_object_id = 0;
+                
+                // Set 200 status
+                status_header(200);
+                
+                include($template);
+                exit;
+            }
+        }
+    }
+    
+    // Fallback: kiểm tra query var từ rewrite rules
+    $project_slug = get_query_var('project_slug');
+    if ($project_slug && !empty($project_slug)) {
+        $template = locate_template('single-project.php');
+        if ($template) {
+            // Set query vars đúng cách
+            $wp_query->is_404 = false;
+            $wp_query->is_page = true;
+            $wp_query->is_singular = true;
+            $wp_query->is_home = false;
+            $wp_query->is_archive = false;
+            
+            // Tạo fake post object
+            global $post;
+            $post = new stdClass();
+            $post->ID = 0;
+            $post->post_author = 1;
+            $post->post_date = current_time('mysql');
+            $post->post_date_gmt = current_time('mysql', 1);
+            $post->post_content = '';
+            $post->post_title = 'Project: ' . $project_slug;
+            $post->post_excerpt = '';
+            $post->post_status = 'publish';
+            $post->comment_status = 'closed';
+            $post->ping_status = 'closed';
+            $post->post_password = '';
+            $post->post_name = $project_slug;
+            $post->to_ping = '';
+            $post->pinged = '';
+            $post->post_modified = current_time('mysql');
+            $post->post_modified_gmt = current_time('mysql', 1);
+            $post->post_content_filtered = '';
+            $post->post_parent = 0;
+            $post->guid = home_url('/' . $project_slug . '/');
+            $post->menu_order = 0;
+            $post->post_type = 'page';
+            $post->post_mime_type = '';
+            $post->comment_count = 0;
+            $post->filter = 'raw';
+            
+            // Set vào query
+            $wp_query->posts = array($post);
+            $wp_query->post_count = 1;
+            $wp_query->post = $post;
+            
+            status_header(200);
+            
+            include($template);
+            exit;
+        }
+    }
+}
+add_action('template_redirect', 'tavaled_project_template_redirect', 1);
+
+// Flush rewrite rules khi theme được activate
+add_action('after_switch_theme', function() {
+    tavaled_add_project_rewrite_rules();
+    flush_rewrite_rules();
+});
+
+// Flush rewrite rules khi save permalinks
+add_action('admin_init', function() {
+    if (isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') {
+        tavaled_add_project_rewrite_rules();
+        flush_rewrite_rules();
+    }
+});
 
 // Add ACF options page (if ACF is active)
 if (function_exists('acf_add_options_page')) {

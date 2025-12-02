@@ -53,7 +53,14 @@ get_header();
                                 <i class="fas fa-cogs"></i>
                                 <span><?php esc_html_e('Giải pháp', 'tavaled-theme'); ?></span>
                             </a>
-                            <a href="<?php echo esc_url(home_url('/du-an')); ?>" class="suggestion-card glass-card">
+                            <?php
+                            $projectsPage = get_pages(array(
+                                'meta_key' => '_wp_page_template',
+                                'meta_value' => 'template-project.php'
+                            ));
+                            $projectsPageUrl = !empty($projectsPage) ? get_permalink($projectsPage[0]->ID) : home_url();
+                            ?>
+                            <a href="<?php echo esc_url($projectsPageUrl); ?>" class="suggestion-card glass-card">
                                 <i class="fas fa-project-diagram"></i>
                                 <span><?php esc_html_e('Dự án', 'tavaled-theme'); ?></span>
                             </a>
