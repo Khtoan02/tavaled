@@ -46,6 +46,16 @@ function tavaled_register_project_manager_page() {
         'tavaled-project-categories',
         'tavaled_render_project_categories_page'
     );
+
+    // Submenu: Nhập dự án hàng loạt
+    add_submenu_page(
+        'tavaled-project-manager',
+        __('Nhập dự án hàng loạt', 'tavaled-theme'),
+        __('Nhập hàng loạt', 'tavaled-theme'),
+        'manage_options',
+        'tavaled-project-import',
+        'tavaled_render_project_import_page'
+    );
 }
 add_action('admin_menu', 'tavaled_register_project_manager_page');
 
@@ -510,6 +520,430 @@ function tavaled_render_project_manager_page() {
     </div>
     <?php
 }
+
+/**
+ * Xử lý tải file CSV mẫu cho nhập dự án hàng loạt
+ * Chạy sớm trên admin_init để không bị chèn HTML của admin vào file.
+ */
+function tavaled_handle_project_import_sample_download() {
+    if (!is_admin()) {
+        return;
+    }
+
+    if (!isset($_GET['page']) || $_GET['page'] !== 'tavaled-project-import') {
+        return;
+    }
+
+    if (!isset($_GET['download_sample']) || $_GET['download_sample'] !== '1') {
+        return;
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die(__('Bạn không có quyền tải file này.', 'tavaled-theme'));
+    }
+
+    $filename = 'tavaled-projects-sample.csv';
+
+    // Gửi header CSV trước khi bất kỳ HTML nào được in ra
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    $output = fopen('php://output', 'w');
+
+    // BOM cho Excel hiển thị tiếng Việt đúng
+    fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+    // Header
+    fputcsv($output, array(
+        'title',
+        'intro',
+        'seo_content',
+        'client',
+        'location',
+        'area',
+        'year',
+        'pixel',
+        'category_slug',
+        'status',
+        'hero_image_url',
+        'gallery_image_urls',
+    ));
+
+    // Một dòng ví dụ
+    fputcsv($output, array(
+        'Hội Trường Vingroup Riverside',
+        'Hệ thống màn hình cong High-Refresh Rate phục vụ hội nghị cấp cao.',
+        'Nội dung SEO chi tiết cho dự án, có thể chứa HTML cơ bản.',
+        'Vingroup',
+        'Hà Nội',
+        '45',
+        '2023',
+        'P2.5 Pro',
+        'indoor',
+        'publish',
+        'https://example.com/path-to-hero-image.jpg',
+        'https://example.com/gallery-1.jpg|https://example.com/gallery-2.jpg',
+    ));
+
+    fclose($output);
+    exit;
+}
+add_action('admin_init', 'tavaled_handle_project_import_sample_download');
+
+/**
+ * Trang nhập dự án hàng loạt từ file CSV
+ *
+ * File mẫu gồm các cột (theo đúng thứ tự):
+ *  - title              : Tiêu đề dự án (bắt buộc)
+ *  - intro              : Mô tả ngắn
+ *  - seo_content        : Nội dung chi tiết (HTML / text)
+ *  - client             : Khách hàng / Chủ đầu tư
+ *  - location           : Địa điểm
+ *  - area               : Diện tích (m2)
+ *  - year               : Năm hoàn thành (4 chữ số)
+ *  - pixel              : Pixel / cấu hình chính
+ *  - category_slug      : slug danh mục dự án (VD: indoor, outdoor, san-khau)
+ *  - status             : publish | draft (mặc định publish nếu trống)
+ *  - hero_image_url     : URL ảnh hero (tùy chọn)
+ *  - gallery_image_urls : Danh sách URL ảnh gallery, ngăn cách bằng dấu |
+ */
+function tavaled_render_project_import_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $list_url      = admin_url('admin.php?page=tavaled-project-manager');
+    $import_result = null;
+
+    // Xử lý upload & import
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tavaled_project_import_nonce']) && wp_verify_nonce($_POST['tavaled_project_import_nonce'], 'tavaled_import_projects')) {
+        if (!empty($_FILES['projects_file']['tmp_name'])) {
+            $file = $_FILES['projects_file'];
+
+            // Chỉ chấp nhận CSV – Excel có thể lưu dưới dạng CSV để import
+            $overrides = array('test_form' => false, 'mimes' => array('csv' => 'text/csv'));
+            $uploaded  = wp_handle_upload($file, $overrides);
+
+            if (!isset($uploaded['error']) && !empty($uploaded['file'])) {
+                $path = $uploaded['file'];
+                $fh   = fopen($path, 'r');
+
+                if ($fh) {
+                    $row        = 0;
+                    $created    = 0;
+                    $updated    = 0;
+                    $errors     = array();
+
+                    // Đọc từng dòng
+                    while (($data = fgetcsv($fh, 0, ',')) !== false) {
+                        $row++;
+
+                        // Bỏ qua dòng header
+                        if ($row === 1) {
+                            continue;
+                        }
+
+                        // Đảm bảo đủ cột
+                        $data = array_pad($data, 12, '');
+
+                        list(
+                            $title,
+                            $intro,
+                            $seo_content,
+                            $client,
+                            $location,
+                            $area,
+                            $year,
+                            $pixel,
+                            $category_slug,
+                            $status,
+                            $hero_image_url,
+                            $gallery_image_urls
+                        ) = $data;
+
+                        $title = trim($title);
+                        if ($title === '') {
+                            $errors[] = sprintf(__('Dòng %d: thiếu tiêu đề, bỏ qua.', 'tavaled-theme'), $row);
+                            continue;
+                        }
+
+                        $status = trim($status) === 'draft' ? 'draft' : 'publish';
+
+                        // Kiểm tra xem đã có dự án cùng tiêu đề chưa
+                        $existing = get_page_by_title($title, OBJECT, 'tavaled_project');
+                        $post_data = array(
+                            'post_type'    => 'tavaled_project',
+                            'post_title'   => $title,
+                            'post_content' => $seo_content,
+                            'post_status'  => $status,
+                        );
+
+                        if ($existing) {
+                            $post_data['ID'] = $existing->ID;
+                            $project_id      = wp_update_post($post_data, true);
+                            $is_update       = true;
+                        } else {
+                            $project_id = wp_insert_post($post_data, true);
+                            $is_update  = false;
+                        }
+
+                        if (is_wp_error($project_id) || !$project_id) {
+                            $errors[] = sprintf(__('Dòng %d: không thể lưu dự án (%s).', 'tavaled-theme'), $row, $title);
+                            continue;
+                        }
+
+                        // Meta cơ bản
+                        update_post_meta($project_id, '_tavaled_project_intro', $intro);
+                        update_post_meta($project_id, '_tavaled_project_client', $client);
+                        update_post_meta($project_id, '_tavaled_project_location', $location);
+                        update_post_meta($project_id, '_tavaled_project_area', $area);
+                        update_post_meta($project_id, '_tavaled_project_year', $year);
+                        update_post_meta($project_id, '_tavaled_project_pixel', $pixel);
+
+                        // Danh mục (taxonomy)
+                        $category_slug = sanitize_title($category_slug);
+                        if ($category_slug !== '') {
+                            $term = get_term_by('slug', $category_slug, 'tavaled_project_category');
+                            if (!$term) {
+                                $inserted = wp_insert_term($category_slug, 'tavaled_project_category', array(
+                                    'slug' => $category_slug,
+                                    'name' => ucfirst($category_slug),
+                                ));
+                                if (!is_wp_error($inserted) && isset($inserted['term_id'])) {
+                                    $term = get_term($inserted['term_id'], 'tavaled_project_category');
+                                }
+                            }
+                            if ($term && !is_wp_error($term)) {
+                                wp_set_object_terms($project_id, array($term->term_id), 'tavaled_project_category', false);
+                            }
+                        }
+
+                        // Hero image từ URL
+                        if (!empty($hero_image_url)) {
+                            $hero_id = tavaled_import_image_from_url($hero_image_url, $project_id);
+                            if ($hero_id) {
+                                update_post_meta($project_id, '_tavaled_project_hero_id', $hero_id);
+                                // Nếu post chưa có thumbnail, set luôn
+                                if (!has_post_thumbnail($project_id)) {
+                                    set_post_thumbnail($project_id, $hero_id);
+                                }
+                            }
+                        }
+
+                        // Gallery images từ URL (ngăn cách bởi | )
+                        $gallery_ids = array();
+                        if (!empty($gallery_image_urls)) {
+                            $urls = explode('|', $gallery_image_urls);
+                            foreach ($urls as $url) {
+                                $url = trim($url);
+                                if ($url === '') {
+                                    continue;
+                                }
+                                $img_id = tavaled_import_image_from_url($url, $project_id);
+                                if ($img_id) {
+                                    $gallery_ids[] = $img_id;
+                                }
+                            }
+                        }
+                        if (!empty($gallery_ids)) {
+                            update_post_meta($project_id, '_tavaled_project_gallery_ids', $gallery_ids);
+                        }
+
+                        if ($is_update) {
+                            $updated++;
+                        } else {
+                            $created++;
+                        }
+                    } // end while
+
+                    fclose($fh);
+
+                    $import_result = array(
+                        'created' => $created,
+                        'updated' => $updated,
+                        'errors'  => $errors,
+                    );
+                } else {
+                    $import_result = array(
+                        'created' => 0,
+                        'updated' => 0,
+                        'errors'  => array(__('Không đọc được file đã upload.', 'tavaled-theme')),
+                    );
+                }
+            } else {
+                $error_msg = isset($uploaded['error']) ? $uploaded['error'] : __('Upload thất bại.', 'tavaled-theme');
+                $import_result = array(
+                    'created' => 0,
+                    'updated' => 0,
+                    'errors'  => array($error_msg),
+                );
+            }
+        } else {
+            $import_result = array(
+                'created' => 0,
+                'updated' => 0,
+                'errors'  => array(__('Vui lòng chọn file CSV để import.', 'tavaled-theme')),
+            );
+        }
+    }
+
+    ?>
+    <div class="wrap tavaled-project-import-page">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            .tavaled-project-import-page {
+                --bg-dark: #0f1633;
+                --accent-orange: #f05a25;
+                --text-white: #ffffff;
+                --text-gray: #b0b8d1;
+                --glass-bg: rgba(28, 40, 87, 0.7);
+                --glass-border: rgba(255, 255, 255, 0.08);
+            }
+            .tavaled-project-import-page * {
+                box-sizing: border-box;
+                font-family: 'Montserrat', sans-serif;
+            }
+            .tavaled-project-import-inner {
+                background-color: var(--bg-dark);
+                color: var(--text-white);
+                min-height: 100vh;
+                padding: 40px;
+                margin: 20px 0;
+                border-radius: 16px;
+            }
+            .tavaled-project-import-page h2 {
+                margin-top: 0;
+                margin-bottom: 10px;
+            }
+            .tavaled-project-import-page p.description {
+                color: var(--text-gray);
+                font-size: 14px;
+            }
+            .tavaled-project-import-page .panel {
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                border-radius: 12px;
+                padding: 25px;
+                margin-top: 20px;
+            }
+            .tavaled-project-import-page .form-field {
+                margin-bottom: 20px;
+            }
+            .tavaled-project-import-page input[type="file"] {
+                width: 100%;
+                max-width: 400px;
+            }
+            .tavaled-project-import-page .button-primary {
+                background: var(--accent-orange);
+                border-color: var(--accent-orange);
+            }
+            .tavaled-project-import-page .notice {
+                margin-top: 20px;
+            }
+        </style>
+
+        <div class="tavaled-project-import-inner">
+            <h2><?php esc_html_e('Nhập dự án hàng loạt', 'tavaled-theme'); ?></h2>
+            <p class="description">
+                <?php esc_html_e('Tải file CSV (có thể xuất từ Excel) theo đúng cấu trúc mẫu, hệ thống sẽ tự động tạo / cập nhật các dự án tương ứng.', 'tavaled-theme'); ?>
+            </p>
+
+            <p>
+                <a href="<?php echo esc_url(add_query_arg(array('page' => 'tavaled-project-import', 'download_sample' => '1'), admin_url('admin.php'))); ?>" class="button">
+                    <?php esc_html_e('Tải file mẫu CSV', 'tavaled-theme'); ?>
+                </a>
+                <a href="<?php echo esc_url($list_url); ?>" class="button">
+                    <?php esc_html_e('Quay lại danh sách dự án', 'tavaled-theme'); ?>
+                </a>
+            </p>
+
+            <div class="panel">
+                <form method="post" enctype="multipart/form-data">
+                    <?php wp_nonce_field('tavaled_import_projects', 'tavaled_project_import_nonce'); ?>
+                    <div class="form-field">
+                        <label for="projects_file"><strong><?php esc_html_e('Chọn file CSV', 'tavaled-theme'); ?></strong></label><br>
+                        <input type="file" name="projects_file" id="projects_file" accept=".csv" required>
+                        <p class="description">
+                            <?php esc_html_e('Hỗ trợ file .csv. Nếu bạn dùng Excel, hãy lưu file dưới dạng CSV (UTF-8) trước khi tải lên.', 'tavaled-theme'); ?>
+                        </p>
+                    </div>
+                    <p>
+                        <button type="submit" class="button button-primary">
+                            <?php esc_html_e('Thực hiện nhập dữ liệu', 'tavaled-theme'); ?>
+                        </button>
+                    </p>
+                </form>
+
+                <?php if (!empty($import_result)) : ?>
+                    <div class="notice notice-info">
+                        <p>
+                            <?php
+                            printf(
+                                /* translators: 1: created count, 2: updated count */
+                                esc_html__('Đã tạo mới %1$d dự án, cập nhật %2$d dự án.', 'tavaled-theme'),
+                                (int) $import_result['created'],
+                                (int) $import_result['updated']
+                            );
+                            ?>
+                        </p>
+                        <?php if (!empty($import_result['errors'])) : ?>
+                            <ul>
+                                <?php foreach ($import_result['errors'] as $msg) : ?>
+                                    <li><?php echo esc_html($msg); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ * Hỗ trợ import ảnh từ URL về thư viện media và trả về attachment ID
+ */
+function tavaled_import_image_from_url($url, $post_id = 0) {
+    if (empty($url)) {
+        return 0;
+    }
+
+    // Tránh import trùng: nếu đã có attachment với meta _tavaled_source_url, có thể tái sử dụng
+    $existing = get_posts(array(
+        'post_type'  => 'attachment',
+        'meta_key'   => '_tavaled_source_url',
+        'meta_value' => esc_url_raw($url),
+        'numberposts'=> 1,
+        'fields'     => 'ids',
+    ));
+    if (!empty($existing)) {
+        return (int) $existing[0];
+    }
+
+    // Sideload image
+    $tmp = download_url($url);
+    if (is_wp_error($tmp)) {
+        return 0;
+    }
+
+    $file_array = array(
+        'name'     => basename(parse_url($url, PHP_URL_PATH)),
+        'tmp_name' => $tmp,
+    );
+
+    $id = media_handle_sideload($file_array, $post_id);
+
+    if (is_wp_error($id)) {
+        @unlink($tmp);
+        return 0;
+    }
+
+    update_post_meta($id, '_tavaled_source_url', esc_url_raw($url));
+    return (int) $id;
+}
 /**
  * Trang Thêm / Chỉnh sửa Dự án
  */
@@ -670,6 +1104,34 @@ function tavaled_render_project_editor_page() {
                 $category = $terms[0];
             }
         }
+    }
+
+    // Lấy danh sách danh mục dự án hiện có trong taxonomy
+    $project_categories = get_terms(array(
+        'taxonomy'   => 'tavaled_project_category',
+        'hide_empty' => false,
+        'orderby'    => 'name',
+        'order'      => 'ASC',
+    ));
+
+    // Nếu chưa có term nào (site mới), tạo sẵn 3 danh mục cơ bản để sử dụng
+    if (empty($project_categories) || is_wp_error($project_categories)) {
+        $default_terms = array(
+            'indoor'  => __('Trong nhà (Indoor)', 'tavaled-theme'),
+            'outdoor' => __('Ngoài trời (Outdoor)', 'tavaled-theme'),
+            'rental'  => __('Sân khấu (Rental)', 'tavaled-theme'),
+        );
+
+        foreach ($default_terms as $slug => $name) {
+            $inserted = wp_insert_term($name, 'tavaled_project_category', array('slug' => $slug));
+        }
+
+        $project_categories = get_terms(array(
+            'taxonomy'   => 'tavaled_project_category',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        ));
     }
 
     $heading = $is_edit ? 'Chỉnh sửa Dự Án' : 'Thêm Dự Án Mới';
@@ -1196,9 +1658,13 @@ function tavaled_render_project_editor_page() {
                         <div class="form-group">
                             <label class="form-label">Danh mục</label>
                             <select class="form-select" name="project_category">
-                                <option value="indoor" <?php selected($category, 'indoor'); ?>>Trong nhà (Indoor)</option>
-                                <option value="outdoor" <?php selected($category, 'outdoor'); ?>>Ngoài trời (Outdoor)</option>
-                                <option value="rental" <?php selected($category, 'rental'); ?>>Sân khấu (Rental)</option>
+                                <?php if (!empty($project_categories) && !is_wp_error($project_categories)) : ?>
+                                    <?php foreach ($project_categories as $term) : ?>
+                                        <option value="<?php echo esc_attr($term->slug); ?>" <?php selected($category, $term->slug); ?>>
+                                            <?php echo esc_html($term->name); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                         <div class="form-group">

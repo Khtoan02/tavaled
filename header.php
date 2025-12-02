@@ -160,9 +160,9 @@
                             </a>
                         </div>
                         <div class="company-item">
-                            <a href="<?php echo esc_url(get_permalink(get_page_by_path('lien-he')) ?: home_url('/lien-he')); ?>" class="company-link">
+                            <a href="<?php echo esc_url(get_permalink(get_page_by_path('du-an-tieu-bieu')) ?: home_url('/du-an-tieu-bieu')); ?>" class="company-link">
                                 <i class="fas fa-award"></i>
-                                <span>Hồ sơ năng lực</span>
+                                <span>Dự án tiêu biểu</span>
                             </a>
                         </div>
                     </div>

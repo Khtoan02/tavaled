@@ -658,9 +658,31 @@ get_header();
     <?php
     // Ưu tiên dữ liệu thật từ CPT; nếu chưa có, fallback về mock để giao diện không bị trống
     $tavaled_projects_js = function_exists('tavaled_get_projects_js_data') ? tavaled_get_projects_js_data() : array();
+    $tavaled_project_terms_js = array();
+
+    if (!empty($tavaled_projects_js)) {
+        // Lấy danh sách danh mục dự án đang có để hiển thị làm tabs filter
+        $terms = get_terms(array(
+            'taxonomy'   => 'tavaled_project_category',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        ));
+
+        if (!is_wp_error($terms) && !empty($terms)) {
+            foreach ($terms as $term) {
+                $tavaled_project_terms_js[] = array(
+                    'slug' => $term->slug,
+                    'name' => $term->name,
+                );
+            }
+        }
+    }
+
     if (!empty($tavaled_projects_js)) :
     ?>
     const projects = <?php echo wp_json_encode($tavaled_projects_js); ?>;
+    const projectCategories = <?php echo wp_json_encode($tavaled_project_terms_js); ?>;
     <?php else : ?>
     // Fallback MOCK DATA (sẽ được thay thế dần bằng dữ liệu thật)
     const projects = [
@@ -798,6 +820,11 @@ get_header();
             ]
         }
     ];
+    const projectCategories = [
+        { slug: 'indoor',  name: 'Trong nhà' },
+        { slug: 'outdoor', name: 'Ngoài trời' },
+        { slug: 'rental',  name: 'Sân khấu' },
+    ];
     <?php endif; ?>
 
     let currentFilter = 'all';
@@ -868,9 +895,10 @@ get_header();
         app.innerHTML = `
             <div class="filter-wrapper">
                 ${renderFilterBtn('all', 'Tất cả')}
-                ${renderFilterBtn('indoor', 'Trong nhà')}
-                ${renderFilterBtn('outdoor', 'Ngoài trời')}
-                ${renderFilterBtn('rental', 'Sân khấu')}
+                ${Array.isArray(projectCategories) && projectCategories.length
+                    ? projectCategories.map(cat => renderFilterBtn(cat.slug, cat.name)).join('')
+                    : ''
+                }
             </div>
 
             <div class="projects-grid">

@@ -669,6 +669,10 @@ function tavaled_get_projects_js_data() {
         $intro    = get_post_meta($post_id, '_tavaled_project_intro', true);
 
         // Hero + thumb
+        // Ưu tiên:
+        //  - Hero image (meta riêng) cho trang single
+        //  - Thumbnail (Featured Image) cho listing
+        //  - Nếu thiếu 1 trong 2 thì fallback qua ảnh còn lại
         $thumb_url = get_the_post_thumbnail_url($post_id, 'project-thumb');
         if (!$thumb_url) {
             $thumb_url = get_the_post_thumbnail_url($post_id, 'large');
@@ -676,8 +680,22 @@ function tavaled_get_projects_js_data() {
 
         $hero_id  = get_post_meta($post_id, '_tavaled_project_hero_id', true);
         $hero_url = $hero_id ? wp_get_attachment_image_url($hero_id, 'banner') : '';
-        if (!$hero_url) {
+
+        // Nếu chưa có hero riêng thì dùng thumbnail
+        if (!$hero_url && $thumb_url) {
             $hero_url = $thumb_url;
+        }
+
+        // Ngược lại: nếu có hero nhưng chưa set thumbnail, dùng hero cho thumbnail (để card ngoài list vẫn có ảnh)
+        if (!$thumb_url && $hero_url) {
+            $thumb_url = $hero_url;
+        }
+
+        // Fallback cuối: placeholder nếu cả hai đều trống
+        if (!$thumb_url && !$hero_url) {
+            $placeholder = get_template_directory_uri() . '/assets/images/project-placeholder.jpg';
+            $thumb_url   = $placeholder;
+            $hero_url    = $placeholder;
         }
 
         // Dynamic technical specs (array of label/value)
