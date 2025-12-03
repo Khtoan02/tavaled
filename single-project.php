@@ -16,7 +16,7 @@ get_header();
 ?>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <style>
     /* --- 1. CORE VARIABLES --- */
@@ -53,6 +53,18 @@ get_header();
 
     .projects-page-wrapper * {
         font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Giữ nguyên font của Font Awesome cho icon, tránh bị override bởi rule * ở trên */
+    .projects-page-wrapper i.fa,
+    .projects-page-wrapper i.fas,
+    .projects-page-wrapper i.far,
+    .projects-page-wrapper i.fab,
+    .projects-page-wrapper i.fa-solid,
+    .projects-page-wrapper i.fa-regular,
+    .projects-page-wrapper i.fa-brands {
+        font-family: "Font Awesome 6 Free","Font Awesome 5 Free","Font Awesome 5 Brands",sans-serif;
+        font-weight: 900;
     }
 
     /* Font chuyên dụng cho thông số kỹ thuật */
@@ -462,7 +474,7 @@ get_header();
                         <span style="color: var(--accent-orange); font-size: 14px; font-weight: 600;">Chi tiết dự án</span>
                     </div>
                     <a href="<?php echo esc_url($projectsPageUrl); ?>" class="back-button" style="margin-bottom: 0;">
-                        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
 
@@ -675,7 +687,7 @@ get_header();
                     <h2 style="color: var(--white); margin-bottom: 20px;">Không tìm thấy dự án</h2>
                     <p style="color: var(--text-gray); margin-bottom: 20px;">Vui lòng chọn dự án từ trang danh sách.</p>
                     <a href="${projectsPageUrl}" class="back-button">
-                        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
             `;
@@ -690,7 +702,7 @@ get_header();
                     <h2 style="color: var(--white); margin-bottom: 20px;">Không tìm thấy dự án</h2>
                     <p style="color: var(--text-gray); margin-bottom: 20px;">Dự án "${projectSlug}" không tồn tại.</p>
                     <a href="${projectsPageUrl}" class="back-button">
-                        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
             `;
@@ -715,7 +727,7 @@ get_header();
                 <div style="text-align: center; padding: 60px 20px;">
                     <h2 style="color: var(--white); margin-bottom: 20px;">Không tìm thấy dự án</h2>
                     <a href="${projectsPageUrl}" class="back-button">
-                        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </a>
                 </div>
             `;
@@ -761,17 +773,17 @@ get_header();
                             <h1 style="font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin-bottom: 20px; font-weight: 800; color: var(--white);">${p.title}</h1>
                             <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                                 <div style="display: flex; align-items: center; gap: 8px; color: var(--text-gray); font-size: 14px;">
-                                    <i class="fa-solid fa-location-dot" style="color: var(--accent-orange);"></i>
+                                    <i class="fas fa-map-marker-alt" style="color: var(--accent-orange);"></i>
                                     <span>${p.location}</span>
                                 </div>
                                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
                                 <div style="display: flex; align-items: center; gap: 8px; color: var(--text-gray); font-size: 14px;">
-                                    <i class="fa-solid fa-calendar" style="color: var(--accent-orange);"></i>
+                                    <i class="fas fa-calendar-alt" style="color: var(--accent-orange);"></i>
                                     <span>${p.year}</span>
                                 </div>
                                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
                                 <div style="display: flex; align-items: center; gap: 8px; color: var(--text-gray); font-size: 14px;">
-                                    <i class="fa-solid fa-ruler-combined" style="color: var(--accent-orange);"></i>
+                                    <i class="fas fa-vector-square" style="color: var(--accent-orange);"></i>
                                     <span>${p.area} m²</span>
                                 </div>
                             </div>
@@ -781,7 +793,7 @@ get_header();
                         </p>
                         <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05);">
                             <h3 style="color: var(--white); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                                <i class="fa-solid fa-microchip" style="color: var(--accent-orange);"></i>
+                                <i class="fas fa-microchip" style="color: var(--accent-orange);"></i>
                                 Thông số kỹ thuật
                             </h3>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -805,13 +817,13 @@ get_header();
                            class="btn-glow popup-trigger"
                            data-source="Contact Popup - Single Project"
                            style="width: 100%; justify-content: center; display: inline-flex;">
-                            <i class="fa-solid fa-bolt"></i> Yêu cầu báo giá
+                            <i class="fas fa-bolt"></i> Yêu cầu báo giá
                         </a>
                     </div>
                     <div class="hero-image-wrapper">
                         <img src="${p.heroImage}" alt="${p.title} - Main View" loading="lazy">
                         <div style="position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); padding: 8px 15px; border-radius: 6px; color:white; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.3s ease;">
-                            <i class="fa-solid fa-expand"></i> <span>Phóng to</span>
+                            <i class="fas fa-expand"></i> <span>Phóng to</span>
                         </div>
                     </div>
                 </div>
@@ -842,7 +854,7 @@ get_header();
                            class="btn-glow popup-trigger"
                            data-source="Contact Popup - Single Project - SEO Section"
                            style="display: inline-flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-phone"></i> Liên hệ tư vấn ngay
+                            <i class="fas fa-phone"></i> Liên hệ tư vấn ngay
                         </a>
                     </div>
                 </div>

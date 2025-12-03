@@ -123,6 +123,18 @@ function tavaled_render_project_manager_page() {
                 font-family: 'Montserrat', sans-serif;
             }
 
+            /* Giữ nguyên font của Font Awesome trong admin page, tránh bị override */
+            .tavaled-project-admin-page i.fa,
+            .tavaled-project-admin-page i.fas,
+            .tavaled-project-admin-page i.far,
+            .tavaled-project-admin-page i.fab,
+            .tavaled-project-admin-page i.fa-solid,
+            .tavaled-project-admin-page i.fa-regular,
+            .tavaled-project-admin-page i.fa-brands {
+                font-family: "Font Awesome 6 Free","Font Awesome 5 Free","Font Awesome 5 Brands",sans-serif;
+                font-weight: 900;
+            }
+
             .tavaled-project-admin-page-inner {
                 background-color: var(--bg-dark);
                 color: var(--text-white);
