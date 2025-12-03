@@ -826,7 +826,7 @@ get_header();
 
                 <div class="seo-section">
                     <h3 style="color: var(--white); font-size: 14px; text-transform: uppercase; font-weight: 700; margin-bottom: 20px; opacity: 0.5;">
-                        Thông tin chi tiết dự án (SEO Description)
+                        Thông tin chi tiết dự án
                     </h3>
                     <div class="seo-content">${seoText}</div>
 
