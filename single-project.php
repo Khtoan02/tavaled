@@ -15,9 +15,7 @@ if (!defined('ABSPATH')) {
 get_header();
 ?>
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -803,9 +801,12 @@ get_header();
                                 </div>
                             </div>
                         </div>
-                        <button class="btn-glow" style="width: 100%; justify-content: center;">
+                        <a href="#contact-popup"
+                           class="btn-glow popup-trigger"
+                           data-source="Contact Popup - Single Project"
+                           style="width: 100%; justify-content: center; display: inline-flex;">
                             <i class="fa-solid fa-bolt"></i> Yêu cầu báo giá
-                        </button>
+                        </a>
                     </div>
                     <div class="hero-image-wrapper">
                         <img src="${p.heroImage}" alt="${p.title} - Main View" loading="lazy">
@@ -837,9 +838,12 @@ get_header();
                     </div>
 
                     <div class="bottom-cta-container">
-                        <button class="btn-glow">
+                        <a href="#contact-popup"
+                           class="btn-glow popup-trigger"
+                           data-source="Contact Popup - Single Project - SEO Section"
+                           style="display: inline-flex; align-items: center; justify-content: center;">
                             <i class="fa-solid fa-phone"></i> Liên hệ tư vấn ngay
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
