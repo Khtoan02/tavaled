@@ -244,25 +244,36 @@ if (!function_exists('tavaled_render_wc_product_card')) {
                             </div>
 
                             <?php if ($has_products) : ?>
-                                <div class="category-slider" data-slider="<?php echo esc_attr($category->slug); ?>">
-                                    <div class="category-slider-track">
-                                        <?php
-                                        while ($category_products->have_posts()) :
-                                            $category_products->the_post();
-                                            $product = wc_get_product(get_the_ID());
-                                            if (!$product) {
-                                                continue;
-                                            }
-                                            echo tavaled_render_wc_product_card($product, $category);
-                                        endwhile;
-                                        ?>
+                                <?php
+                                // Load hàm render showcase product card nếu chưa có
+                                if (!function_exists('tavaled_render_showcase_product_card')) {
+                                    require_once get_template_directory() . '/inc/product-card-helper.php';
+                                }
+                                ?>
+                                <div class="category-slider products-carousel active" data-carousel="<?php echo esc_attr($category->slug); ?>">
+                                    <div class="carousel-wrapper">
+                                        <div class="carousel-container">
+                                            <div class="category-slider-track carousel-track">
+                                                <?php
+                                                while ($category_products->have_posts()) :
+                                                    $category_products->the_post();
+                                                    $product = wc_get_product(get_the_ID());
+                                                    if (!$product) {
+                                                        continue;
+                                                    }
+                                                    echo tavaled_render_showcase_product_card($product);
+                                                endwhile;
+                                                ?>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="carousel-nav carousel-prev category-slider-nav prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button type="button" class="carousel-nav carousel-next category-slider-nav next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
                                     </div>
-                                    <button type="button" class="category-slider-nav prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </button>
-                                    <button type="button" class="category-slider-nav next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </button>
                                 </div>
                             <?php else : ?>
                                 <div class="category-empty-state glass-card">

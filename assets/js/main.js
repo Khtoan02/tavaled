@@ -676,61 +676,40 @@
 
   // Category sliders on product archive
   function initCategorySliders() {
-    var sliders = $(".category-slider");
+    var sliders = $(".category-slider.products-carousel");
     if (!sliders.length) {
       return;
     }
 
     sliders.each(function () {
       var slider = $(this);
-      var track = slider.find(".category-slider-track");
-      var cards = track.find(".category-product-card");
-      var prevBtn = slider.find(".category-slider-nav.prev");
-      var nextBtn = slider.find(".category-slider-nav.next");
+      var track = slider.find(".carousel-track");
+      var cards = track.find(".product-card");
+      var container = slider.find(".carousel-container");
+      var prevBtn = slider.find(".carousel-prev");
+      var nextBtn = slider.find(".carousel-next");
+      var transitionValue = track.css("transition");
 
       if (!cards.length) {
         slider.addClass("is-static");
-        prevBtn.prop("disabled", true);
-        nextBtn.prop("disabled", true);
+        prevBtn.hide();
+        nextBtn.hide();
         return;
       }
 
       var currentIndex = 0;
-      var cardWidth = cards.first().outerWidth();
-      var initialStyles = window.getComputedStyle(track[0]);
-      var cardSpacing =
-        parseFloat(initialStyles.columnGap || initialStyles.gap || 0) || 0;
-      var containerWidth = slider.innerWidth();
-      var visibleCards = Math.max(
-        1,
-        Math.floor(containerWidth / (cardWidth + cardSpacing))
-      );
-      var maxIndex = Math.max(0, cards.length - visibleCards);
-
-      function updateNavState() {
-        if (cards.length <= visibleCards) {
-          slider.addClass("is-static");
-          prevBtn.prop("disabled", true);
-          nextBtn.prop("disabled", true);
-        } else {
-          slider.removeClass("is-static");
-          prevBtn.prop("disabled", currentIndex === 0);
-          nextBtn.prop("disabled", currentIndex >= maxIndex);
-        }
-      }
-
-      function moveSlider() {
-        var translateX = -currentIndex * (cardWidth + cardSpacing);
-        track.css("transform", "translateX(" + translateX + "px)");
-        updateNavState();
-      }
+      var cardWidth = 0;
+      var cardSpacing = 0;
+      var containerWidth = 0;
+      var visibleCards = 1;
+      var maxIndex = 0;
 
       function recalcDimensions() {
         cardWidth = cards.first().outerWidth();
         var computedStyles = window.getComputedStyle(track[0]);
         cardSpacing =
           parseFloat(computedStyles.columnGap || computedStyles.gap || 0) || 0;
-        containerWidth = slider.innerWidth();
+        containerWidth = container.innerWidth() || slider.innerWidth();
         visibleCards = Math.max(
           1,
           Math.floor(containerWidth / (cardWidth + cardSpacing))
@@ -739,103 +718,164 @@
         currentIndex = Math.min(currentIndex, maxIndex);
       }
 
-      prevBtn.on("click", function () {
+      function updateNavState() {
+        if (cards.length <= visibleCards) {
+          slider.addClass("is-static");
+          prevBtn.hide();
+          nextBtn.hide();
+        } else {
+          slider.removeClass("is-static");
+          prevBtn.show();
+          nextBtn.show();
+          prevBtn.prop("disabled", currentIndex === 0);
+          nextBtn.prop("disabled", currentIndex >= maxIndex);
+        }
+      }
+
+      function moveSlider() {
+        var translateX = -currentIndex * (cardWidth + cardSpacing);
+        track.css("transition", transitionValue);
+        track.css("transform", "translateX(" + translateX + "px)");
+        updateNavState();
+      }
+
+      prevBtn.off("click.archiveSlider").on("click.archiveSlider", function () {
         if (currentIndex > 0) {
           currentIndex--;
           moveSlider();
         }
       });
 
-      nextBtn.on("click", function () {
+      nextBtn.off("click.archiveSlider").on("click.archiveSlider", function () {
         if (currentIndex < maxIndex) {
           currentIndex++;
           moveSlider();
         }
       });
 
-      // Drag / swipe support
+      // Drag / swipe support with smart axis lock
       var startX = 0;
-      var currentX = 0;
+      var startY = 0;
+      var lastX = 0;
       var isDragging = false;
+      var dragAxis = null;
 
-      track.on("touchstart mousedown", function (e) {
-        if (e.type === "mousedown" && e.which !== 1) return;
-        isDragging = true;
-        startX = e.type === "mousedown" ? e.pageX : e.touches[0].pageX;
-        currentX = startX;
-        track.addClass("is-dragging");
-      });
+      track
+        .off("touchstart.archiveDrag mousedown.archiveDrag")
+        .on("touchstart.archiveDrag mousedown.archiveDrag", function (e) {
+          if (e.type === "mousedown" && e.which !== 1) return;
+          var point = e.type === "mousedown" ? e : e.originalEvent.touches[0];
+          isDragging = true;
+          dragAxis = null;
+          startX = point.pageX;
+          startY = point.pageY;
+          lastX = startX;
+          track.addClass("is-dragging").css("transition", "none");
+        });
 
-      track.on("touchmove mousemove", function (e) {
-        if (!isDragging) return;
-        currentX = e.type === "mousemove" ? e.pageX : e.touches[0].pageX;
-        var diff = currentX - startX;
-        track.css(
-          "transform",
-          "translateX(" + (-currentIndex * (cardWidth + cardSpacing) + diff) + "px)"
-        );
-        if (e.cancelable) {
-          e.preventDefault();
-        }
-      });
+      track
+        .off("touchmove.archiveDrag mousemove.archiveDrag")
+        .on("touchmove.archiveDrag mousemove.archiveDrag", function (e) {
+          if (!isDragging) return;
+          var point = e.type === "mousemove" ? e : e.originalEvent.touches[0];
+          var diffX = point.pageX - startX;
+          var diffY = point.pageY - startY;
 
-      track.on("touchend mouseup mouseleave", function () {
-        if (!isDragging) return;
-        isDragging = false;
-        track.removeClass("is-dragging");
-        var diff = currentX - startX;
-        var threshold = cardWidth / 4;
-
-        if (Math.abs(diff) > threshold) {
-          if (diff > 0 && currentIndex > 0) {
-            currentIndex--;
-          } else if (diff < 0 && currentIndex < maxIndex) {
-            currentIndex++;
+          if (dragAxis === null) {
+            if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
+              dragAxis = Math.abs(diffX) > Math.abs(diffY) ? "x" : "y";
+            }
           }
-        }
 
-        moveSlider();
-      });
+          if (dragAxis !== "x") {
+            return;
+          }
 
-      // Mouse wheel / trackpad horizontal scrolling
-      track.off("wheel.categoryWheel").on("wheel.categoryWheel", function (event) {
-        var e = event.originalEvent || event;
-        var deltaX = e.deltaX || 0;
-        var deltaY = e.deltaY || 0;
-        var primaryDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+          lastX = point.pageX;
+          track.css(
+            "transform",
+            "translateX(" +
+              (-currentIndex * (cardWidth + cardSpacing) + diffX) +
+              "px)"
+          );
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+          e.stopPropagation();
+        });
 
-        if (!primaryDelta) {
-          return;
-        }
+      track
+        .off("touchend.archiveDrag mouseup.archiveDrag mouseleave.archiveDrag")
+        .on(
+          "touchend.archiveDrag mouseup.archiveDrag mouseleave.archiveDrag",
+          function () {
+            if (!isDragging) return;
+            isDragging = false;
+            track.removeClass("is-dragging").css("transition", transitionValue);
 
-        if (primaryDelta > 0 && currentIndex < maxIndex) {
-          currentIndex++;
-        } else if (primaryDelta < 0 && currentIndex > 0) {
-          currentIndex--;
-        }
+            if (dragAxis !== "x") {
+              moveSlider();
+              return;
+            }
 
-        moveSlider();
+            var diff = lastX - startX;
+            var threshold = Math.max(cardWidth * 0.2, 24);
 
-        // Khoá cuộn dọc khi người dùng đang cuộn ngang slider
-        if (event.cancelable) {
-          event.preventDefault();
-        }
-        event.stopPropagation();
-      });
+            if (Math.abs(diff) > threshold) {
+              if (diff > 0 && currentIndex > 0) {
+                currentIndex--;
+              } else if (diff < 0 && currentIndex < maxIndex) {
+                currentIndex++;
+              }
+            }
 
-      // Initial calculation
+            moveSlider();
+          }
+        );
+
+      // Mouse wheel / trackpad horizontal scrolling with axis guard
+      track
+        .off("wheel.archiveCategory")
+        .on("wheel.archiveCategory", function (event) {
+          var e = event.originalEvent || event;
+          var deltaX = e.deltaX || 0;
+          var deltaY = e.deltaY || 0;
+          var absX = Math.abs(deltaX);
+          var absY = Math.abs(deltaY);
+
+          if (absY > absX && absY > 8) {
+            return;
+          }
+
+          var primaryDelta = absX >= absY ? deltaX : deltaY;
+
+          if (primaryDelta > 0 && currentIndex < maxIndex) {
+            currentIndex++;
+            moveSlider();
+          } else if (primaryDelta < 0 && currentIndex > 0) {
+            currentIndex--;
+            moveSlider();
+          }
+
+          if (event.cancelable) {
+            event.preventDefault();
+          }
+          event.stopPropagation();
+        });
+
       recalcDimensions();
       moveSlider();
 
-      // Responsive recalculation
       var resizeTimer;
-      $(window).on("resize", function () {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-          recalcDimensions();
-          moveSlider();
-        }, 250);
-      });
+      $(window)
+        .off("resize.archiveSlider" + slider.data("carousel"))
+        .on("resize.archiveSlider" + slider.data("carousel"), function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            recalcDimensions();
+            moveSlider();
+          }, 250);
+        });
     });
   }
 })(jQuery);
