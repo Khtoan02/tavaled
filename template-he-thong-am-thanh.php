@@ -221,25 +221,30 @@ if ($audio_tag && $is_woocommerce_active) {
                         </div>
 
                         <?php if ($has_products) : ?>
-                            <div class="audio-system-category-slider" data-audio-slider="<?php echo esc_attr($category->slug); ?>">
-                                <div class="audio-system-category-slider-track">
-                                    <?php
-                                    while ($category_products->have_posts()) :
-                                        $category_products->the_post();
-                                        $product = wc_get_product(get_the_ID());
-                                        if (!$product) {
-                                            continue;
-                                        }
-                                        echo tavaled_render_wc_product_card($product, $category);
-                                    endwhile;
-                                    ?>
+                            <div class="audio-system-category-slider products-carousel active" data-carousel="<?php echo esc_attr($category->slug); ?>">
+                                <div class="carousel-wrapper">
+                                    <div class="carousel-container">
+                                        <div class="audio-system-category-slider-track carousel-track">
+                                            <?php
+                                            while ($category_products->have_posts()) :
+                                                $category_products->the_post();
+                                                $product = wc_get_product(get_the_ID());
+                                                if (!$product) {
+                                                    continue;
+                                                }
+                                                echo tavaled_render_showcase_product_card($product);
+                                            endwhile;
+                                            ?>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="carousel-nav carousel-prev audio-system-slider-nav audio-system-slider-prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button type="button" class="carousel-nav carousel-next audio-system-slider-nav audio-system-slider-next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
                                 </div>
-                                <button type="button" class="audio-system-slider-nav audio-system-slider-prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button type="button" class="audio-system-slider-nav audio-system-slider-next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
                             </div>
                         <?php else : ?>
                             <div class="audio-system-empty-state">

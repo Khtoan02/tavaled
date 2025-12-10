@@ -221,25 +221,30 @@ if ($lighting_tag && $is_woocommerce_active) {
                         </div>
 
                         <?php if ($has_products) : ?>
-                            <div class="lighting-system-category-slider" data-lighting-slider="<?php echo esc_attr($category->slug); ?>">
-                                <div class="lighting-system-category-slider-track">
-                                    <?php
-                                    while ($category_products->have_posts()) :
-                                        $category_products->the_post();
-                                        $product = wc_get_product(get_the_ID());
-                                        if (!$product) {
-                                            continue;
-                                        }
-                                        echo tavaled_render_wc_product_card($product, $category);
-                                    endwhile;
-                                    ?>
+                            <div class="lighting-system-category-slider products-carousel active" data-carousel="<?php echo esc_attr($category->slug); ?>">
+                                <div class="carousel-wrapper">
+                                    <div class="carousel-container">
+                                        <div class="lighting-system-category-slider-track carousel-track">
+                                            <?php
+                                            while ($category_products->have_posts()) :
+                                                $category_products->the_post();
+                                                $product = wc_get_product(get_the_ID());
+                                                if (!$product) {
+                                                    continue;
+                                                }
+                                                echo tavaled_render_showcase_product_card($product);
+                                            endwhile;
+                                            ?>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="carousel-nav carousel-prev lighting-system-slider-nav lighting-system-slider-prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button type="button" class="carousel-nav carousel-next lighting-system-slider-nav lighting-system-slider-next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
                                 </div>
-                                <button type="button" class="lighting-system-slider-nav lighting-system-slider-prev" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm trước', 'tavaled-theme'); ?>">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button type="button" class="lighting-system-slider-nav lighting-system-slider-next" aria-label="<?php esc_attr_e('Xem nhóm sản phẩm tiếp theo', 'tavaled-theme'); ?>">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
                             </div>
                         <?php else : ?>
                             <div class="lighting-system-empty-state">

@@ -22,17 +22,19 @@
 
     // Initialize category sliders
     initSliders: function () {
-      var sliders = $(".led-screen-page .led-screen-category-slider");
+      var sliders = $(".led-screen-page .products-carousel");
       if (!sliders.length) {
         return;
       }
 
       sliders.each(function () {
         var slider = $(this);
-        var track = slider.find(".led-screen-category-slider-track");
-        var cards = track.find(".category-product-card");
-        var prevBtn = slider.find(".led-screen-slider-nav.led-screen-slider-prev");
-        var nextBtn = slider.find(".led-screen-slider-nav.led-screen-slider-next");
+        var track = slider.find(".carousel-track");
+        var cards = track.find(".product-card");
+        var container = slider.find(".carousel-container");
+        var prevBtn = slider.find(".carousel-prev");
+        var nextBtn = slider.find(".carousel-next");
+        var transitionValue = track.css("transition");
 
         if (!cards.length) {
           slider.addClass("is-static");
@@ -41,26 +43,27 @@
           return;
         }
 
-        // Nếu có 4 sản phẩm trở xuống, không hiển thị slider
-        if (cards.length <= 4) {
-          slider.addClass("is-static");
-          prevBtn.hide();
-          nextBtn.hide();
-          track.css("transform", "none");
-          return;
-        }
-
         var currentIndex = 0;
-        var cardWidth = cards.first().outerWidth();
-        var initialStyles = window.getComputedStyle(track[0]);
-        var cardSpacing =
-          parseFloat(initialStyles.columnGap || initialStyles.gap || 0) || 0;
-        var containerWidth = slider.innerWidth();
-        var visibleCards = Math.max(
-          1,
-          Math.floor(containerWidth / (cardWidth + cardSpacing))
-        );
-        var maxIndex = Math.max(0, cards.length - visibleCards);
+        var cardWidth = 0;
+        var cardSpacing = 0;
+        var containerWidth = 0;
+        var visibleCards = 1;
+        var maxIndex = 0;
+
+        function recalcDimensions() {
+          cardWidth = cards.first().outerWidth();
+          var computedStyles = window.getComputedStyle(track[0]);
+          cardSpacing =
+            parseFloat(computedStyles.columnGap || computedStyles.gap || 0) ||
+            0;
+          containerWidth = container.innerWidth() || slider.innerWidth();
+          visibleCards = Math.max(
+            1,
+            Math.floor(containerWidth / (cardWidth + cardSpacing))
+          );
+          maxIndex = Math.max(0, cards.length - visibleCards);
+          currentIndex = Math.min(currentIndex, maxIndex);
+        }
 
         function updateNavState() {
           if (cards.length <= visibleCards) {
@@ -78,127 +81,170 @@
 
         function moveSlider() {
           var translateX = -currentIndex * (cardWidth + cardSpacing);
+          track.css("transition", transitionValue);
           track.css("transform", "translateX(" + translateX + "px)");
           updateNavState();
         }
 
-        function recalcDimensions() {
-          cardWidth = cards.first().outerWidth();
-          var computedStyles = window.getComputedStyle(track[0]);
-          cardSpacing =
-            parseFloat(computedStyles.columnGap || computedStyles.gap || 0) || 0;
-          containerWidth = slider.innerWidth();
-          visibleCards = Math.max(
-            1,
-            Math.floor(containerWidth / (cardWidth + cardSpacing))
-          );
-          maxIndex = Math.max(0, cards.length - visibleCards);
-          currentIndex = Math.min(currentIndex, maxIndex);
-        }
-
-        // Previous button click
-        prevBtn.on("click", function () {
+        prevBtn.off("click.ledSlider").on("click.ledSlider", function () {
           if (currentIndex > 0) {
             currentIndex--;
             moveSlider();
           }
         });
 
-        // Next button click
-        nextBtn.on("click", function () {
+        nextBtn.off("click.ledSlider").on("click.ledSlider", function () {
           if (currentIndex < maxIndex) {
             currentIndex++;
             moveSlider();
           }
         });
 
-        // Drag / swipe support
+        // Drag / swipe support with smart axis lock
         var startX = 0;
-        var currentX = 0;
+        var startY = 0;
+        var lastX = 0;
         var isDragging = false;
+        var dragAxis = null;
 
-        track.on("touchstart mousedown", function (e) {
-          if (e.type === "mousedown" && e.which !== 1) return;
-          isDragging = true;
-          startX = e.type === "mousedown" ? e.pageX : e.touches[0].pageX;
-          currentX = startX;
-          track.addClass("is-dragging");
-        });
+        track
+          .off("touchstart.ledDrag mousedown.ledDrag")
+          .on("touchstart.ledDrag mousedown.ledDrag", function (e) {
+            if (e.type === "mousedown" && e.which !== 1) return;
+            var point = e.type === "mousedown" ? e : e.originalEvent.touches[0];
+            isDragging = true;
+            dragAxis = null;
+            startX = point.pageX;
+            startY = point.pageY;
+            lastX = startX;
+            track.addClass("is-dragging").css("transition", "none");
+          });
 
-        track.on("touchmove mousemove", function (e) {
-          if (!isDragging) return;
-          currentX = e.type === "mousemove" ? e.pageX : e.touches[0].pageX;
-          var diff = currentX - startX;
-          track.css(
-            "transform",
-            "translateX(" + (-currentIndex * (cardWidth + cardSpacing) + diff) + "px)"
-          );
-          if (e.type === "mousemove") {
-            e.preventDefault();
-          }
-        });
+        track
+          .off("touchmove.ledDrag mousemove.ledDrag")
+          .on("touchmove.ledDrag mousemove.ledDrag", function (e) {
+            if (!isDragging) return;
+            var point = e.type === "mousemove" ? e : e.originalEvent.touches[0];
+            var diffX = point.pageX - startX;
+            var diffY = point.pageY - startY;
 
-        track.on("touchend mouseup mouseleave", function () {
-          if (!isDragging) return;
-          isDragging = false;
-          track.removeClass("is-dragging");
-          var diff = currentX - startX;
-          var threshold = cardWidth / 4;
-
-          if (Math.abs(diff) > threshold) {
-            if (diff > 0 && currentIndex > 0) {
-              currentIndex--;
-            } else if (diff < 0 && currentIndex < maxIndex) {
-              currentIndex++;
+            if (dragAxis === null) {
+              if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
+                dragAxis = Math.abs(diffX) > Math.abs(diffY) ? "x" : "y";
+              }
             }
-          }
 
-          moveSlider();
-        });
+            if (dragAxis !== "x") {
+              return;
+            }
 
-        // Initial calculation
+            lastX = point.pageX;
+            track.css(
+              "transform",
+              "translateX(" +
+                (-currentIndex * (cardWidth + cardSpacing) + diffX) +
+                "px)"
+            );
+            if (e.cancelable) {
+              e.preventDefault();
+            }
+            e.stopPropagation();
+          });
+
+        track
+          .off("touchend.ledDrag mouseup.ledDrag mouseleave.ledDrag")
+          .on(
+            "touchend.ledDrag mouseup.ledDrag mouseleave.ledDrag",
+            function () {
+              if (!isDragging) return;
+              isDragging = false;
+              track
+                .removeClass("is-dragging")
+                .css("transition", transitionValue);
+
+              if (dragAxis !== "x") {
+                moveSlider();
+                return;
+              }
+
+              var diff = lastX - startX;
+              var threshold = Math.max(cardWidth * 0.2, 24);
+
+              if (Math.abs(diff) > threshold) {
+                if (diff > 0 && currentIndex > 0) {
+                  currentIndex--;
+                } else if (diff < 0 && currentIndex < maxIndex) {
+                  currentIndex++;
+                }
+              }
+
+              moveSlider();
+            }
+          );
+
+        // Mouse wheel / trackpad horizontal scrolling with axis guard
+        track
+          .off("wheel.ledCategory")
+          .on("wheel.ledCategory", function (event) {
+            var e = event.originalEvent || event;
+            var deltaX = e.deltaX || 0;
+            var deltaY = e.deltaY || 0;
+            var absX = Math.abs(deltaX);
+            var absY = Math.abs(deltaY);
+
+            if (absY > absX && absY > 8) {
+              return;
+            }
+
+            var primaryDelta = absX >= absY ? deltaX : deltaY;
+
+            if (primaryDelta > 0 && currentIndex < maxIndex) {
+              currentIndex++;
+              moveSlider();
+            } else if (primaryDelta < 0 && currentIndex > 0) {
+              currentIndex--;
+              moveSlider();
+            }
+
+            if (event.cancelable) {
+              event.preventDefault();
+            }
+            event.stopPropagation();
+          });
+
         recalcDimensions();
         moveSlider();
 
-        // Responsive recalculation
         var resizeTimer;
-        $(window).on("resize", function () {
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(function () {
-            // Kiểm tra lại số lượng sản phẩm sau khi resize
-            if (cards.length <= 4) {
-              slider.addClass("is-static");
-              prevBtn.hide();
-              nextBtn.hide();
-              track.css("transform", "none");
-              return;
-            }
-            recalcDimensions();
-            moveSlider();
-          }, 250);
-        });
+        $(window)
+          .off("resize.ledSlider" + slider.data("carousel"))
+          .on("resize.ledSlider" + slider.data("carousel"), function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+              recalcDimensions();
+              moveSlider();
+            }, 250);
+          });
       });
     },
 
     // Initialize responsive behaviors
     initResponsive: function () {
-      // Hide navigation buttons on mobile (chỉ cho các slider có > 4 sản phẩm)
+      var sliders = $(".led-screen-page .products-carousel");
+
       function checkMobileNav() {
         var windowWidth = $(window).width();
-        var sliders = $(".led-screen-page .led-screen-category-slider");
-        
+
         sliders.each(function () {
           var slider = $(this);
-          var cards = slider.find(".category-product-card");
-          var navButtons = slider.find(".led-screen-slider-nav");
-          
-          // Nếu có <= 4 sản phẩm, luôn ẩn nút
-          if (cards.length <= 4) {
+          var cards = slider.find(".product-card");
+          var navButtons = slider.find(".carousel-nav");
+
+          if (cards.length <= 1) {
             navButtons.hide();
             return;
           }
-          
-          // Nếu > 4 sản phẩm, ẩn trên mobile, hiện trên desktop
+
           if (windowWidth <= 768) {
             navButtons.hide();
           } else {
@@ -207,9 +253,11 @@
         });
       }
 
-      $(window).on("resize", function () {
-        checkMobileNav();
-      });
+      $(window)
+        .off("resize.ledNav")
+        .on("resize.ledNav", function () {
+          checkMobileNav();
+        });
 
       checkMobileNav();
     },
@@ -225,4 +273,3 @@
     ledScreenPage.init();
   });
 })(jQuery);
-

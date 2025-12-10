@@ -98,3 +98,88 @@ if (!function_exists('tavaled_render_wc_product_card')) {
     }
 }
 
+/**
+ * Render product card with homepage carousel layout
+ *
+ * @param WC_Product $product
+ * @return string
+ */
+if (!function_exists('tavaled_render_showcase_product_card')) {
+    function tavaled_render_showcase_product_card($product) {
+        if (!$product instanceof WC_Product) {
+            return '';
+        }
+
+        $product_id        = $product->get_id();
+        $product_title     = $product->get_name();
+        $product_image_id  = $product->get_image_id();
+        $product_image_url = $product_image_id
+            ? wp_get_attachment_image_url($product_image_id, 'medium')
+            : get_template_directory_uri() . '/assets/images/product-placeholder.jpg';
+        $category_names    = wp_get_post_terms($product_id, 'product_cat', array('fields' => 'names'));
+
+        // Determine badge
+        $product_badge = '';
+        if ($product->is_on_sale()) {
+            $product_badge = 'sale';
+        } elseif ($product->is_featured()) {
+            $product_badge = 'hot';
+        } elseif ($product->get_date_created() && strtotime($product->get_date_created()) > strtotime('-30 days')) {
+            $product_badge = 'new';
+        }
+
+        ob_start();
+        ?>
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                <?php if ($product_badge) : ?>
+                    <div class="product-badge">
+                        <?php if ($product_badge === 'hot') : ?>
+                            <span class="badge-hot"><?php esc_html_e('Bán chạy', 'tavaled-theme'); ?></span>
+                        <?php elseif ($product_badge === 'new') : ?>
+                            <span class="badge-new"><?php esc_html_e('Mới', 'tavaled-theme'); ?></span>
+                        <?php elseif ($product_badge === 'sale') : ?>
+                            <span class="badge-sale"><?php esc_html_e('Giảm giá', 'tavaled-theme'); ?></span>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <a href="<?php echo esc_url($product->get_permalink()); ?>" class="product-image-link">
+                    <img src="<?php echo esc_url($product_image_url); ?>" alt="<?php echo esc_attr($product_title); ?>" class="product-image">
+                </a>
+
+                <div class="product-quick-action">
+                    <a href="<?php echo esc_url($product->get_permalink()); ?>" class="quick-btn" title="<?php esc_attr_e('Xem chi tiết', 'tavaled-theme'); ?>">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="#contact-popup" class="quick-btn popup-trigger" title="<?php esc_attr_e('Báo giá', 'tavaled-theme'); ?>">
+                        <i class="fas fa-calculator"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="product-content">
+                <div class="product-category">
+                    <i class="fas fa-tag"></i>
+                    <span><?php echo !empty($category_names) ? esc_html($category_names[0]) : esc_html__('Sản phẩm LED', 'tavaled-theme'); ?></span>
+                </div>
+
+                <h3 class="product-title">
+                    <a href="<?php echo esc_url($product->get_permalink()); ?>"><?php echo esc_html($product_title); ?></a>
+                </h3>
+
+                <p class="product-description"><?php echo esc_html(wp_trim_words($product->get_short_description() ?: $product->get_description(), 12)); ?></p>
+
+                <div class="product-footer">
+                    <a href="<?php echo esc_url($product->get_permalink()); ?>" class="product-link-btn">
+                        <span><?php esc_html_e('Xem chi tiết', 'tavaled-theme'); ?></span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+}
+

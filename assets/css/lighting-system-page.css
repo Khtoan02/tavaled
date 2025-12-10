@@ -9,7 +9,11 @@
    ============================================ */
 .lighting-system-page .lighting-system-hero {
   padding: clamp(3rem, 8vw, 6rem) 0;
-  background: linear-gradient(135deg, rgba(28, 40, 87, 0.02), rgba(240, 90, 37, 0.03));
+  background: linear-gradient(
+    135deg,
+    rgba(28, 40, 87, 0.02),
+    rgba(240, 90, 37, 0.03)
+  );
 }
 
 .lighting-system-page .lighting-system-hero-grid {
@@ -282,9 +286,13 @@
    ============================================ */
 .lighting-system-page .lighting-system-category-slider {
   position: relative;
-  padding: 0 var(--container-padding, 1.5rem);
-  margin: 0 calc(-1 * var(--container-padding, 1.5rem));
+  padding: 0;
+  margin: 0;
   overflow: visible;
+}
+
+.lighting-system-page .lighting-system-category-slider .carousel-wrapper {
+  padding: 0 52px;
 }
 
 .lighting-system-page .lighting-system-category-slider-track {
@@ -292,6 +300,8 @@
   gap: var(--spacing-md, 1.5rem);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
 }
 
 .lighting-system-page .lighting-system-category-slider-track.is-dragging {
@@ -346,7 +356,9 @@
   overflow: visible;
 }
 
-.lighting-system-page .lighting-system-category-slider.is-static .lighting-system-category-slider-track {
+.lighting-system-page
+  .lighting-system-category-slider.is-static
+  .carousel-track {
   display: flex;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-md, 1.5rem);
@@ -354,7 +366,7 @@
   will-change: auto;
 }
 
-.lighting-system-page .lighting-system-category-slider.is-static .lighting-system-slider-nav {
+.lighting-system-page .lighting-system-category-slider.is-static .carousel-nav {
   display: none !important;
 }
 
@@ -414,7 +426,11 @@
   gap: var(--spacing-lg, 2rem);
   padding: clamp(2rem, 5vw, 3.5rem);
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(28, 40, 87, 0.9), rgba(28, 40, 87, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(28, 40, 87, 0.9),
+    rgba(28, 40, 87, 0.95)
+  );
   color: #fff;
   box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
 }
@@ -448,13 +464,17 @@
   justify-content: center;
 }
 
-.lighting-system-page .lighting-system-cta-actions .lighting-system-btn-secondary {
+.lighting-system-page
+  .lighting-system-cta-actions
+  .lighting-system-btn-secondary {
   border-color: rgba(255, 255, 255, 0.6);
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.lighting-system-page .lighting-system-cta-actions .lighting-system-btn-secondary:hover {
+.lighting-system-page
+  .lighting-system-cta-actions
+  .lighting-system-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.8);
 }
@@ -482,16 +502,20 @@
     padding: 0 var(--spacing-md, 1.5rem);
   }
 
-  .lighting-system-page .lighting-system-slider-nav.lighting-system-slider-prev {
+  .lighting-system-page
+    .lighting-system-slider-nav.lighting-system-slider-prev {
     left: 0;
   }
 
-  .lighting-system-page .lighting-system-slider-nav.lighting-system-slider-next {
+  .lighting-system-page
+    .lighting-system-slider-nav.lighting-system-slider-next {
     right: 0;
   }
 
   /* Grid layout responsive cho static slider trên tablet */
-  .lighting-system-page .lighting-system-category-slider.is-static .lighting-system-category-slider-track {
+  .lighting-system-page
+    .lighting-system-category-slider.is-static
+    .lighting-system-category-slider-track {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
@@ -545,8 +569,12 @@
     gap: 0.75rem;
   }
 
-  .lighting-system-page .lighting-system-hero-actions .lighting-system-btn-primary,
-  .lighting-system-page .lighting-system-hero-actions .lighting-system-btn-secondary {
+  .lighting-system-page
+    .lighting-system-hero-actions
+    .lighting-system-btn-primary,
+  .lighting-system-page
+    .lighting-system-hero-actions
+    .lighting-system-btn-secondary {
     width: 100%;
     justify-content: center;
     padding: 0.625rem 1.25rem;
@@ -600,12 +628,21 @@
     padding: 0;
   }
 
-  .lighting-system-page .lighting-system-slider-nav {
-    display: none;
+  .lighting-system-page .lighting-system-slider-nav,
+  .lighting-system-page .carousel-nav,
+  .lighting-system-page .carousel-prev,
+  .lighting-system-page .carousel-next {
+    display: none !important;
+  }
+
+  .lighting-system-page .lighting-system-category-slider .carousel-wrapper {
+    padding: 0;
   }
 
   /* Grid layout responsive cho static slider */
-  .lighting-system-page .lighting-system-category-slider.is-static .lighting-system-category-slider-track {
+  .lighting-system-page
+    .lighting-system-category-slider.is-static
+    .lighting-system-category-slider-track {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
@@ -657,8 +694,12 @@
     gap: 0.75rem;
   }
 
-  .lighting-system-page .lighting-system-cta-actions .lighting-system-btn-primary,
-  .lighting-system-page .lighting-system-cta-actions .lighting-system-btn-secondary {
+  .lighting-system-page
+    .lighting-system-cta-actions
+    .lighting-system-btn-primary,
+  .lighting-system-page
+    .lighting-system-cta-actions
+    .lighting-system-btn-secondary {
     width: 100%;
     justify-content: center;
     padding: 0.625rem 1.25rem;
@@ -695,4 +736,3 @@
     padding: 1.25rem;
   }
 }
-

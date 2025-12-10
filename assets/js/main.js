@@ -610,7 +610,9 @@
 
     track.on("touchmove mousemove", function (e) {
       if (!isDragging) return;
-      e.preventDefault();
+      if (e.cancelable) {
+        e.preventDefault();
+      }
       currentX = e.type === "mousemove" ? e.pageX : e.touches[0].pageX;
       var diff = currentX - startX;
       track.css("transform", "translateX(" + (-currentIndex * cardWidth + diff) + "px)");
@@ -633,6 +635,32 @@
       }
 
       moveCarousel();
+    });
+
+    // Mouse wheel / trackpad horizontal scrolling
+    track.off("wheel.carouselWheel").on("wheel.carouselWheel", function (event) {
+      var e = event.originalEvent || event;
+      var deltaX = e.deltaX || 0;
+      var deltaY = e.deltaY || 0;
+      var primaryDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+
+      if (!primaryDelta) {
+        return;
+      }
+
+      if (primaryDelta > 0 && currentIndex < maxIndex) {
+        currentIndex++;
+        moveCarousel();
+      } else if (primaryDelta < 0 && currentIndex > 0) {
+        currentIndex--;
+        moveCarousel();
+      }
+
+      // Ngăn cuộn dọc khi đang lướt slider
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      event.stopPropagation();
     });
 
     // Responsive handling
@@ -746,7 +774,7 @@
           "transform",
           "translateX(" + (-currentIndex * (cardWidth + cardSpacing) + diff) + "px)"
         );
-        if (e.type === "mousemove") {
+        if (e.cancelable) {
           e.preventDefault();
         }
       });
@@ -767,6 +795,32 @@
         }
 
         moveSlider();
+      });
+
+      // Mouse wheel / trackpad horizontal scrolling
+      track.off("wheel.categoryWheel").on("wheel.categoryWheel", function (event) {
+        var e = event.originalEvent || event;
+        var deltaX = e.deltaX || 0;
+        var deltaY = e.deltaY || 0;
+        var primaryDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+
+        if (!primaryDelta) {
+          return;
+        }
+
+        if (primaryDelta > 0 && currentIndex < maxIndex) {
+          currentIndex++;
+        } else if (primaryDelta < 0 && currentIndex > 0) {
+          currentIndex--;
+        }
+
+        moveSlider();
+
+        // Khoá cuộn dọc khi người dùng đang cuộn ngang slider
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        event.stopPropagation();
       });
 
       // Initial calculation

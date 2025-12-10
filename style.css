@@ -4401,6 +4401,8 @@ body {
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   gap: var(--spacing-md);
   will-change: transform;
+  touch-action: pan-x;
+  cursor: grab;
 }
 
 .carousel-track .product-card {
@@ -8268,6 +8270,8 @@ body.admin-bar .single-reading-progress {
   gap: var(--spacing-md);
   transition: transform var(--transition-slow);
   will-change: transform;
+  touch-action: pan-x;
+  cursor: grab;
 }
 
 .category-slider-track.is-dragging {
